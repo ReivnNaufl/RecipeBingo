@@ -1,4 +1,4 @@
-package com.unluckybgs.recipebingo.ui.theme
+package com.unluckygbs.recipebingo.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

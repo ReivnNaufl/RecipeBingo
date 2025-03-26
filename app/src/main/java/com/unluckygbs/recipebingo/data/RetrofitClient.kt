@@ -1,4 +1,4 @@
-import com.unluckybgs.recipebingo.data.ApiService
+import com.unluckygbs.recipebingo.data.ApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

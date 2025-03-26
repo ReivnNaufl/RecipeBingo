@@ -1,4 +1,4 @@
-package com.unluckybgs.recipebingo
+package com.unluckygbs.recipebingo
 
 import org.junit.Test
 

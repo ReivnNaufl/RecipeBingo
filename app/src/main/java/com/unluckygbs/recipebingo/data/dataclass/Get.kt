@@ -1,4 +1,4 @@
-package com.unluckybgs.recipebingo.data.dataclass
+package com.unluckygbs.recipebingo.data.dataclass
 
 data class ApiResponse(
     val message: String,

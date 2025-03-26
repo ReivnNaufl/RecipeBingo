@@ -2,12 +2,14 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
+
 }
 
 val apiKey: String = project.findProperty("API_KEY") as String? ?: "default-api-key"
 
 android {
-    namespace = "com.unluckybgs.recipebingo"
+    namespace = "com.unluckygbs.recipebingo"
     compileSdk = 35
 
     buildFeatures {
@@ -15,7 +17,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.unluckybgs.recipebingo"
+        applicationId = "com.unluckygbs.recipebingo"
         minSdk = 29
         targetSdk = 35
         versionCode = 1
@@ -67,4 +69,6 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.google.code.gson:gson:2.10.1")
+
+    implementation(platform("com.google.firebase:firebase-bom:33.11.0"))
 }

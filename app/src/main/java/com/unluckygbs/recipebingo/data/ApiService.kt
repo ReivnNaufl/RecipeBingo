@@ -1,9 +1,9 @@
-package com.unluckybgs.recipebingo.data
+package com.unluckygbs.recipebingo.data
 
-import com.unluckybgs.recipebingo.data.dataclass.ApiResponse
+import com.unluckygbs.recipebingo.data.dataclass.ApiResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
-import com.unluckybgs.recipebingo.BuildConfig
+import com.unluckygbs.recipebingo.BuildConfig
 
 const val apiKey = BuildConfig.API_KEY
 
