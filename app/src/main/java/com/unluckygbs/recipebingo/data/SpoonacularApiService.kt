@@ -5,11 +5,10 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 import com.unluckygbs.recipebingo.BuildConfig
 
-const val apiKey = BuildConfig.API_KEY
-
 interface SpoonacularApiService {
-    @GET("recipes/complexSearch?apiKey=${apiKey}")
+    @GET("recipes/complexSearch?")
     suspend fun getRecipeData(
-        @Query("limit") limit: Int = 250,
+        @Query("apiKey") apiKey: String,
+        @Query("limit") limit: Int = 3,
     ): SpoonacularApiResponse
 }

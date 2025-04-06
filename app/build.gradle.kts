@@ -28,6 +28,20 @@ android {
         buildConfigField("String", "API_KEY", "\"$apiKey\"")
     }
 
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/io.netty.versions.properties",
+                "META-INF/INDEX.LIST",
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt"
+            )
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -61,6 +75,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.firebase.appdistribution.gradle)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -74,5 +89,4 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
 
     implementation(platform("com.google.firebase:firebase-bom:33.11.0"))
-
 }
