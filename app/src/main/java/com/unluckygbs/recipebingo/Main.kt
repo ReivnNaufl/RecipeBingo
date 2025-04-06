@@ -1,6 +1,5 @@
 package com.unluckygbs.recipebingo
 
-import androidx.compose.foundation.content.MediaType.Companion.Text
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -8,7 +7,6 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -18,22 +16,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.unluckygbs.recipebingo.screen.HomeScreen
-import com.unluckygbs.recipebingo.screen.IngredientScreen
-import com.unluckygbs.recipebingo.screen.LoginScreen
-import com.unluckygbs.recipebingo.screen.NutritionTrackerScreen
-import com.unluckygbs.recipebingo.screen.ProfileScreen
-import com.unluckygbs.recipebingo.screen.RegisterScreen
-import com.unluckygbs.recipebingo.screen.SearchRecipeScreen
+import com.unluckygbs.recipebingo.screen.ingredient.AvailableIngredientScreen
+import com.unluckygbs.recipebingo.screen.home.HomeScreen
+import com.unluckygbs.recipebingo.screen.ingredient.IngredientScreen
+import com.unluckygbs.recipebingo.screen.auth.LoginScreen
+import com.unluckygbs.recipebingo.screen.tracker.NutritionTrackerScreen
+import com.unluckygbs.recipebingo.screen.profile.ProfileScreen
+import com.unluckygbs.recipebingo.screen.auth.RegisterScreen
+import com.unluckygbs.recipebingo.screen.recipe.SearchRecipeScreen
 
 @Composable
 fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel) {
@@ -48,6 +45,9 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel) {
         }
         composable("home"){
             App(modifier,navController,authViewModel)
+        }
+        composable("searchingredient") {
+            AvailableIngredientScreen(modifier,navController,authViewModel)
         }
     })
 }

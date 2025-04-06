@@ -1,4 +1,4 @@
-package com.unluckygbs.recipebingo.screen
+package com.unluckygbs.recipebingo.screen.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,7 +15,7 @@ import com.unluckygbs.recipebingo.AuthState
 import com.unluckygbs.recipebingo.AuthViewModel
 
 @Composable
-fun IngredientScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
+fun ProfileScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
     val authState = authViewModel.authState.observeAsState()
 
     LaunchedEffect(authState.value) {
@@ -30,7 +30,7 @@ fun IngredientScreen(modifier: Modifier = Modifier, navController: NavController
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Stock Ingredient", fontSize = 32.sp)
+        Text(text = "Profile", fontSize = 32.sp)
 
         TextButton(onClick = {
             authViewModel.signout()

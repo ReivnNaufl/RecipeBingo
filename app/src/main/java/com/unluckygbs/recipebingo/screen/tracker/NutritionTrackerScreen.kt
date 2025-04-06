@@ -1,4 +1,4 @@
-package com.unluckygbs.recipebingo.screen
+package com.unluckygbs.recipebingo.screen.tracker
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,13 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import com.unluckygbs.recipebingo.AuthState
 import com.unluckygbs.recipebingo.AuthViewModel
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
-
+fun NutritionTrackerScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
     val authState = authViewModel.authState.observeAsState()
 
     LaunchedEffect(authState.value) {
@@ -32,11 +30,10 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, auth
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Home", fontSize = 32.sp)
+        Text(text = "Nutrition Tracker", fontSize = 32.sp)
 
         TextButton(onClick = {
             authViewModel.signout()
-        }) {Text(text = "Log Out") }
+        }) { Text(text = "Log Out") }
     }
-
 }
