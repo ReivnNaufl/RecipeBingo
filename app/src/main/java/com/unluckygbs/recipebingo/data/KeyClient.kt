@@ -1,9 +1,9 @@
-import com.unluckygbs.recipebingo.data.ApiService
+package com.unluckygbs.recipebingo.data
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object RetrofitClient {
-    private const val BASE_URL = "https://api.spoonacular.com/"
+object KeyClient {
+    private const val BASE_URL = "https://recipe-bingo-pass-manager.vercel.app/api/"
 
     val apiService: ApiService by lazy {
         Retrofit.Builder()
