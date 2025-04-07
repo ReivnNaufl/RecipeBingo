@@ -1,4 +1,4 @@
-package com.unluckygbs.recipebingo
+package com.unluckygbs.recipebingo.viewmodel.auth
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -27,7 +27,7 @@ class AuthViewModel : ViewModel() {
                 if (task.isSuccessful){
                     _authState.value = AuthState.Authenticated
                 }else{
-                    _authState.value = AuthState.Error(task.exception?.message?:"error")
+                    _authState.value = AuthState.Error(task.exception?.message ?: "error")
                 }
             }
     }
@@ -44,7 +44,7 @@ class AuthViewModel : ViewModel() {
                 if (task.isSuccessful){
                     _authState.value = AuthState.Authenticated
                 }else{
-                    _authState.value = AuthState.Error(task.exception?.message?:"error")
+                    _authState.value = AuthState.Error(task.exception?.message ?: "error")
                 }
             }
     }

@@ -23,7 +23,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.unluckygbs.recipebingo.screen.ingredient.AvailableIngredientScreen
+import com.unluckygbs.recipebingo.screen.ingredient.SearchIngredientScreen
 import com.unluckygbs.recipebingo.screen.home.HomeScreen
 import com.unluckygbs.recipebingo.screen.ingredient.IngredientScreen
 import com.unluckygbs.recipebingo.screen.auth.LoginScreen
@@ -31,6 +31,7 @@ import com.unluckygbs.recipebingo.screen.tracker.NutritionTrackerScreen
 import com.unluckygbs.recipebingo.screen.profile.ProfileScreen
 import com.unluckygbs.recipebingo.screen.auth.RegisterScreen
 import com.unluckygbs.recipebingo.screen.recipe.SearchRecipeScreen
+import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 
 @Composable
 fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel) {
@@ -47,7 +48,7 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel) {
             App(modifier,navController,authViewModel)
         }
         composable("searchingredient") {
-            AvailableIngredientScreen(modifier,navController,authViewModel)
+            SearchIngredientScreen(modifier,navController,authViewModel)
         }
     })
 }
@@ -94,7 +95,7 @@ fun App(modifier: Modifier = Modifier,navController: NavController, authViewMode
 }
 
 @Composable
-fun ContentScreen(modifier: Modifier = Modifier,navController: NavController, authViewModel: AuthViewModel,selectedIndex : Int) {
+fun ContentScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, selectedIndex : Int) {
     when(selectedIndex){
         0 -> HomeScreen(modifier,navController,authViewModel)
         1 -> SearchRecipeScreen(modifier,navController,authViewModel)

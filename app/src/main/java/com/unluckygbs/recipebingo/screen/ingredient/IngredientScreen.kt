@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.unluckygbs.recipebingo.AuthState
-import com.unluckygbs.recipebingo.AuthViewModel
+import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
+import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 
 @Composable
 fun IngredientScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {

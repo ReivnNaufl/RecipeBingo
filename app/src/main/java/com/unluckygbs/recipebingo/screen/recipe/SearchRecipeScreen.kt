@@ -11,8 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.unluckygbs.recipebingo.AuthState
-import com.unluckygbs.recipebingo.AuthViewModel
+import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
+import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 
 @Composable
 fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {

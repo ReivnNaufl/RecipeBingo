@@ -17,35 +17,30 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.unluckygbs.recipebingo.AuthState
-import com.unluckygbs.recipebingo.AuthViewModel
+import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
+import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
+import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 
 @Composable
-fun AvailableIngredientScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
+fun SearchIngredientScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    authViewModel: AuthViewModel,
+    ingredientViewModel: IngredientViewModel = viewModel()
+) {
     val authState = authViewModel.authState.observeAsState()
+    val ingredients by ingredientViewModel.ingredients.observeAsState(emptyList())
+    val isLoading by ingredientViewModel.loading.observeAsState(false)
+    val errorMessage by ingredientViewModel.errorMessage.observeAsState()
+
+    var searchQuery by remember { mutableStateOf("") }
 
     LaunchedEffect(authState.value) {
         if (authState.value is AuthState.unAuthenticated) {
             navController.navigate("login")
         }
-    }
-
-    var searchQuery by remember { mutableStateOf("") }
-
-    // Dummy list
-    val allIngredients = listOf(
-        "Ingredient Xyz",
-        "Ingredient Xyz Abc",
-        "Ingredient Xyz B",
-        "Other Ingredient",
-        "Banana",
-        "Tomato"
-    )
-
-    // Filtered list based on search query
-    val filteredIngredients = allIngredients.filter {
-        it.contains(searchQuery, ignoreCase = true)
     }
 
     Scaffold(
@@ -92,17 +87,36 @@ fun AvailableIngredientScreen(modifier: Modifier = Modifier, navController: NavC
                         disabledIndicatorColor = Color.Transparent
                     )
                 )
-                IconButton(onClick = { /* handle search */ }) {
+                IconButton(onClick = {
+                    if (searchQuery.isNotBlank()) {
+                        ingredientViewModel.fetchIngredients(searchQuery)
+                    }
+                }) {
                     Icon(Icons.Default.Search, contentDescription = "Search")
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Ingredient list
-            filteredIngredients.forEach { ingredient ->
-                IngredientResultItem(name = ingredient)
-                Spacer(modifier = Modifier.height(8.dp))
+            when {
+                isLoading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                }
+
+                errorMessage != null -> {
+                    Text("Error: $errorMessage", color = Color.Red)
+                }
+
+                ingredients.isEmpty() -> {
+                    Text("No ingredients found", color = Color.Gray)
+                }
+
+                else -> {
+                    ingredients.forEach { ingredient ->
+                        IngredientResultItem(name = ingredient.name)
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
             }
         }
     }

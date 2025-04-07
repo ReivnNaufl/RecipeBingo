@@ -8,7 +8,7 @@ import com.unluckygbs.recipebingo.BuildConfig
 
 interface KeyApiService {
     @GET("key?key=p4UnluckyGBS")
-    suspend fun getRecipeData(
+    suspend fun getapikey(
         @Query("type") type: String = "DEFAULT",
     ): KeyApiResponse
 }

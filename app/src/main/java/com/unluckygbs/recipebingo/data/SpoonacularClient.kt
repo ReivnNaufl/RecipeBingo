@@ -1,3 +1,5 @@
+package com.unluckygbs.recipebingo.data
+
 import com.unluckygbs.recipebingo.data.SpoonacularApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
