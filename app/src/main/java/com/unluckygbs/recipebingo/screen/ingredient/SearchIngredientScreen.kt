@@ -2,6 +2,7 @@
 
 package com.unluckygbs.recipebingo.screen.ingredient
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,6 +15,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,6 +24,9 @@ import androidx.navigation.NavController
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
+import com.unluckygbs.recipebingo.data.dataclass.Ingredient
+import coil.compose.rememberAsyncImagePainter
+
 
 @Composable
 fun SearchIngredientScreen(
@@ -113,7 +118,7 @@ fun SearchIngredientScreen(
 
                 else -> {
                     ingredients.forEach { ingredient ->
-                        IngredientResultItem(name = ingredient.name)
+                        IngredientResultItem(ingredient)
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
@@ -123,7 +128,9 @@ fun SearchIngredientScreen(
 }
 
 @Composable
-fun IngredientResultItem(name: String) {
+fun IngredientResultItem(ingredient: Ingredient) {
+    val IngredientResultImage = "https://img.spoonacular.com/ingredients_250x250/${ingredient.image}"
+
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier.fillMaxWidth()
@@ -133,16 +140,19 @@ fun IngredientResultItem(name: String) {
             modifier = Modifier.padding(16.dp)
         ) {
             // Placeholder image
-            Box(
+            Image(
+                painter = rememberAsyncImagePainter(model = IngredientResultImage),
+                contentDescription = ingredient.name,
                 modifier = Modifier
                     .size(48.dp)
-                    .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
+                    .background(Color.LightGray, shape = RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
             )
 
             Spacer(modifier = Modifier.width(16.dp))
 
             Text(
-                text = name,
+                text = ingredient.name,
                 modifier = Modifier.weight(1f),
                 fontSize = 16.sp
             )
