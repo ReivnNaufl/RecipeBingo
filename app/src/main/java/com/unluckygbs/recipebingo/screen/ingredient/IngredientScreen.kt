@@ -2,8 +2,10 @@ package com.unluckygbs.recipebingo.screen.ingredient
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
@@ -24,6 +26,22 @@ import coil.compose.rememberAsyncImagePainter
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
+import androidx.compose.material.DismissDirection
+import androidx.compose.material.DismissValue
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.SwipeToDismiss
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.rememberDismissState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import com.unluckygbs.recipebingo.data.dataclass.Ingredient
+import com.unluckygbs.recipebingo.data.entity.IngredientEntity
+import kotlinx.coroutines.launch
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
+
 
 @Composable
 fun IngredientScreen(
@@ -63,6 +81,11 @@ fun AvailableIngredientsScreen(
 ) {
     val ingredients by ingredientViewModel.availableIngredients.observeAsState(emptyList())
 
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+    var editingIngredient by remember { mutableStateOf<IngredientEntity?>(null) }
+    var quantity by remember { mutableStateOf(0.0) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -99,9 +122,82 @@ fun AvailableIngredientsScreen(
             if (ingredients.isEmpty()) {
                 Text("No ingredients found.", color = Color.Gray)
             } else {
-                ingredients.forEach {
-                    IngredientItem(name = it.name, quantity = "${it.quantity} ${it.unit}", image = it.image)
+                ingredients.forEach { ingredient ->
+                    SwipeToDeleteIngredientItem(
+                        name = ingredient.name,
+                        quantity = "${ingredient.quantity} ${ingredient.unit}",
+                        image = ingredient.image,
+                        onDeleteConfirmed = {
+                            ingredientViewModel.deleteIngredient(ingredient)
+                        },
+                        onClick = {
+                            editingIngredient = ingredient // isi state editing
+                            quantity = ingredient.quantity // set nilai awal quantity
+                            scope.launch { sheetState.show() } // tampilkan bottom sheet
+                        }
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+        if (editingIngredient != null) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    editingIngredient = null
+                    scope.launch { sheetState.hide() }
+                },
+                sheetState = sheetState
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text("Edit ${editingIngredient?.name} Quantity", fontSize = 18.sp)
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        IconButton(onClick = { if (quantity > 0) quantity-- }) {
+                            Icon(Icons.Default.Clear, contentDescription = "Decrease", tint = Color(0xFF4CAF50))
+                        }
+                        OutlinedTextField(
+                            value = quantity.toString(),
+                            onValueChange = {
+                                quantity = it.toDoubleOrNull() ?: 0.0
+                            },
+                            label = { Text("Quantity") },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                keyboardType = KeyboardType.Number,
+                                imeAction = ImeAction.Done
+                            ),
+                            modifier = Modifier.width(100.dp)
+                        )
+
+                        IconButton(onClick = { quantity++ }) {
+                            Icon(Icons.Default.Add, contentDescription = "Increase", tint = Color(0xFF4CAF50))
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Button(
+                        onClick = {
+                            editingIngredient?.let {
+                                ingredientViewModel.updateIngredient(it.copy(quantity = quantity))
+                                scope.launch { sheetState.hide() }
+                                editingIngredient = null
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
+                    ) {
+                        Text("Edit")
+                    }
                 }
             }
         }
@@ -142,4 +238,67 @@ fun IngredientItem(name: String, quantity: String, image: String) {
             )
         }
     }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun SwipeToDeleteIngredientItem(
+    name: String,
+    quantity: String,
+    image: String,
+    onDeleteConfirmed: () -> Unit,
+    onClick: () -> Unit // Tambahkan ini
+) {
+    val dismissState = rememberDismissState()
+    val openDialog = remember { mutableStateOf(false) }
+
+    val dismissed = dismissState.isDismissed(DismissDirection.EndToStart)
+    if (dismissed) {
+        openDialog.value = true
+        LaunchedEffect(dismissed) {
+            dismissState.reset()
+        }
+    }
+
+    if (openDialog.value) {
+        AlertDialog(
+            onDismissRequest = { openDialog.value = false },
+            title = { Text("Delete Ingredient") },
+            text = { Text("Are you sure you want to delete \"$name\"?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    openDialog.value = false
+                    onDeleteConfirmed()
+                }) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { openDialog.value = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    SwipeToDismiss(
+        state = dismissState,
+        directions = setOf(DismissDirection.EndToStart),
+        background = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Red)
+                    .padding(16.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Text("Delete", color = Color.White)
+            }
+        },
+        dismissContent = {
+            Box(modifier = Modifier.clickable { onClick() }) {
+                IngredientItem(name = name, quantity = quantity, image = image)
+            }
+        }
+    )
 }

@@ -41,6 +41,9 @@ fun SearchIngredientScreen(
     val isLoading by ingredientViewModel.loading.observeAsState(false)
     val errorMessage by ingredientViewModel.errorMessage.observeAsState()
 
+    val availabelIngredient by ingredientViewModel.availableIngredients.observeAsState(emptyList())
+
+
     var searchQuery by remember { mutableStateOf("") }
 
     LaunchedEffect(authState.value) {
@@ -119,8 +122,17 @@ fun SearchIngredientScreen(
 
                 else -> {
                     ingredients.forEach { ingredient ->
-                        IngredientResultItem(ingredient = ingredient,
-                            onAddClick = { ingredientViewModel.insertIngredient(it.toEntity()) })
+                        val isAdded = availabelIngredient.any { it.name.equals(ingredient.name, ignoreCase = true) }
+
+                        IngredientResultItem(
+                            ingredient = ingredient,
+                            isAdded = isAdded,
+                            onAddClick = {
+                                if (!isAdded) {
+                                    ingredientViewModel.insertIngredient(it.toEntity())
+                                }
+                            }
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
@@ -134,6 +146,7 @@ fun SearchIngredientScreen(
 @Composable
 fun IngredientResultItem(
     ingredient: Ingredient,
+    isAdded: Boolean,
     onAddClick: (Ingredient) -> Unit
 ) {
     val IngredientResultImage = "https://img.spoonacular.com/ingredients_250x250/${ingredient.image}"
@@ -166,14 +179,27 @@ fun IngredientResultItem(
             )
 
             // Tombol Add
-            Button(
-                onClick = { onAddClick(ingredient) }, // << Panggil fungsi di sini!
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C853)),
-                shape = RoundedCornerShape(50)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Add", color = Color.White)
+            if (isAdded) {
+                Button(
+                    onClick = {},
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFA6E9C2)),
+                    shape = RoundedCornerShape(50),
+                    enabled = false
+                ) {
+                    Icon(Icons.Default.Check, contentDescription = "Added", tint = Color.White)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Added", color = Color.White)
+                }
+            } else {
+                Button(
+                    onClick = { onAddClick(ingredient) },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C853)),
+                    shape = RoundedCornerShape(50)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Add", color = Color.White)
+                }
             }
         }
     }

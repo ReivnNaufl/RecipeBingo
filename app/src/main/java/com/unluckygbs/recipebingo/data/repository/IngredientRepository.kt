@@ -10,6 +10,8 @@ class IngredientRepository(private val dao: IngredientDao) {
 
     suspend fun delete(ingredient: IngredientEntity) = dao.deleteIngredient(ingredient)
 
+    suspend fun update(ingredient: IngredientEntity) = dao.updateIngredient(ingredient)
+
     suspend fun clearAll() = dao.clearAll()
 
 

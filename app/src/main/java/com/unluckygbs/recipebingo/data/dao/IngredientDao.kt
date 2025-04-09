@@ -15,6 +15,9 @@ interface IngredientDao {
     @Delete
     suspend fun deleteIngredient(ingredient: IngredientEntity)
 
+    @Update
+    suspend fun updateIngredient(ingredient: IngredientEntity)
+
     @Query("DELETE FROM ingredients")
     suspend fun clearAll()
 }

@@ -96,4 +96,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.2.2")
 
     kapt("androidx.room:room-compiler:2.6.1")
+
+    implementation("androidx.compose.material:material:1.6.1")
+
 }

@@ -51,6 +51,26 @@ class IngredientViewModel(private val ingredientRepository: IngredientRepository
         }
     }
 
+    fun deleteIngredient(ingredient: IngredientEntity) {
+        viewModelScope.launch {
+            try {
+                ingredientRepository.delete(ingredient)
+            } catch (e: Exception) {
+                _errorMessage.value = "Gagal menambahkan: ${e.message}"
+            }
+        }
+    }
+
+    fun updateIngredient(ingredient: IngredientEntity) {
+        viewModelScope.launch {
+            try {
+                ingredientRepository.update(ingredient)
+            } catch (e: Exception) {
+                _errorMessage.value = "Gagal menambahkan: ${e.message}"
+            }
+        }
+    }
+
     val availableIngredients: LiveData<List<IngredientEntity>> = ingredientRepository.allIngredients
 
     fun clearError() {
