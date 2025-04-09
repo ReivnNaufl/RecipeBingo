@@ -26,6 +26,7 @@ import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 import com.unluckygbs.recipebingo.data.dataclass.Ingredient
 import coil.compose.rememberAsyncImagePainter
+import com.unluckygbs.recipebingo.data.dataclass.toEntity
 
 
 @Composable
@@ -33,7 +34,7 @@ fun SearchIngredientScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     authViewModel: AuthViewModel,
-    ingredientViewModel: IngredientViewModel = viewModel()
+    ingredientViewModel: IngredientViewModel
 ) {
     val authState = authViewModel.authState.observeAsState()
     val ingredients by ingredientViewModel.ingredients.observeAsState(emptyList())
@@ -118,7 +119,8 @@ fun SearchIngredientScreen(
 
                 else -> {
                     ingredients.forEach { ingredient ->
-                        IngredientResultItem(ingredient)
+                        IngredientResultItem(ingredient = ingredient,
+                            onAddClick = { ingredientViewModel.insertIngredient(it.toEntity()) })
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
@@ -127,8 +129,13 @@ fun SearchIngredientScreen(
     }
 }
 
+
+
 @Composable
-fun IngredientResultItem(ingredient: Ingredient) {
+fun IngredientResultItem(
+    ingredient: Ingredient,
+    onAddClick: (Ingredient) -> Unit
+) {
     val IngredientResultImage = "https://img.spoonacular.com/ingredients_250x250/${ingredient.image}"
 
     Card(
@@ -139,7 +146,7 @@ fun IngredientResultItem(ingredient: Ingredient) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(16.dp)
         ) {
-            // Placeholder image
+            // Gambar bahan
             Image(
                 painter = rememberAsyncImagePainter(model = IngredientResultImage),
                 contentDescription = ingredient.name,
@@ -151,14 +158,16 @@ fun IngredientResultItem(ingredient: Ingredient) {
 
             Spacer(modifier = Modifier.width(16.dp))
 
+            // Nama bahan
             Text(
                 text = ingredient.name,
                 modifier = Modifier.weight(1f),
                 fontSize = 16.sp
             )
 
+            // Tombol Add
             Button(
-                onClick = { /* Handle Add click */ },
+                onClick = { onAddClick(ingredient) }, // << Panggil fungsi di sini!
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C853)),
                 shape = RoundedCornerShape(50)
             ) {

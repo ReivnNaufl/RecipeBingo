@@ -6,16 +6,18 @@ import com.unluckygbs.recipebingo.data.dataclass.Ingredient
 import kotlinx.coroutines.launch
 import com.unluckygbs.recipebingo.BuildConfig
 import com.unluckygbs.recipebingo.data.KeyClient
+import com.unluckygbs.recipebingo.data.entity.IngredientEntity
+import com.unluckygbs.recipebingo.repository.IngredientRepository
 
-class IngredientViewModel : ViewModel() {
+class IngredientViewModel(private val ingredientRepository: IngredientRepository) : ViewModel() {
 
-    private val _ingredients = MutableLiveData<List<Ingredient>>()
+    private val _ingredients = MutableLiveData<List<Ingredient>>(emptyList())
     val ingredients: LiveData<List<Ingredient>> = _ingredients
 
-    private val _loading = MutableLiveData<Boolean>()
+    private val _loading = MutableLiveData(false)
     val loading: LiveData<Boolean> = _loading
 
-    private val _errorMessage = MutableLiveData<String?>()
+    private val _errorMessage = MutableLiveData<String?>(null)
     val errorMessage: LiveData<String?> = _errorMessage
 
     fun fetchIngredients(query: String) {
@@ -38,4 +40,21 @@ class IngredientViewModel : ViewModel() {
             }
         }
     }
+
+    fun insertIngredient(ingredient: IngredientEntity) {
+        viewModelScope.launch {
+            try {
+                ingredientRepository.insert(ingredient)
+            } catch (e: Exception) {
+                _errorMessage.value = "Gagal menambahkan: ${e.message}"
+            }
+        }
+    }
+
+    val availableIngredients: LiveData<List<IngredientEntity>> = ingredientRepository.allIngredients
+
+    fun clearError() {
+        _errorMessage.value = null
+    }
 }
+

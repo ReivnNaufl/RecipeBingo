@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
 
+    id("kotlin-kapt")
 }
 
 val apiKey: String = project.findProperty("API_KEY") as String? ?: "default-api-key"
@@ -76,6 +77,8 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.firebase.appdistribution.gradle)
+    implementation(libs.androidx.room.common)
+    implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -91,4 +94,6 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.11.0"))
 
     implementation("io.coil-kt:coil-compose:2.2.2")
+
+    kapt("androidx.room:room-compiler:2.6.1")
 }

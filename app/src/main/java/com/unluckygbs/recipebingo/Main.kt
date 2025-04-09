@@ -19,10 +19,12 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.unluckygbs.recipebingo.repository.IngredientRepository
 import com.unluckygbs.recipebingo.screen.ingredient.SearchIngredientScreen
 import com.unluckygbs.recipebingo.screen.home.HomeScreen
 import com.unluckygbs.recipebingo.screen.ingredient.IngredientScreen
@@ -32,10 +34,15 @@ import com.unluckygbs.recipebingo.screen.profile.ProfileScreen
 import com.unluckygbs.recipebingo.screen.auth.RegisterScreen
 import com.unluckygbs.recipebingo.screen.recipe.SearchRecipeScreen
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
+import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
+import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModelFactory
 
 @Composable
-fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel) {
+fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,ingredientRepository: IngredientRepository) {
     val navController = rememberNavController()
+    val ingredientViewModel: IngredientViewModel = viewModel(
+        factory = IngredientViewModelFactory(ingredientRepository)
+    )
 
     NavHost(navController = navController, startDestination = "login", builder = {
         composable("login"){
@@ -45,16 +52,16 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel) {
             RegisterScreen(modifier,navController,authViewModel)
         }
         composable("home"){
-            App(modifier,navController,authViewModel)
+            App(modifier,navController,authViewModel,ingredientViewModel)
         }
         composable("searchingredient") {
-            SearchIngredientScreen(modifier,navController,authViewModel)
+            SearchIngredientScreen(modifier,navController,authViewModel,ingredientViewModel)
         }
     })
 }
 
 @Composable
-fun App(modifier: Modifier = Modifier,navController: NavController, authViewModel: AuthViewModel) {
+fun App(modifier: Modifier = Modifier,navController: NavController, authViewModel: AuthViewModel,ingredientViewModel: IngredientViewModel) {
 
     val navItemList = listOf(
         NavItem("Home", Icons.Default.Home),
@@ -90,16 +97,16 @@ fun App(modifier: Modifier = Modifier,navController: NavController, authViewMode
             }
         }
         ) { innerPadding ->
-        ContentScreen(modifier = Modifier.padding(innerPadding), navController = navController, authViewModel = authViewModel,selectedIndex)
+        ContentScreen(modifier = Modifier.padding(innerPadding), navController = navController, authViewModel = authViewModel,selectedIndex, ingredientViewModel = ingredientViewModel )
     }
 }
 
 @Composable
-fun ContentScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, selectedIndex : Int) {
+fun ContentScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, selectedIndex : Int,ingredientViewModel: IngredientViewModel) {
     when(selectedIndex){
         0 -> HomeScreen(modifier,navController,authViewModel)
         1 -> SearchRecipeScreen(modifier,navController,authViewModel)
-        2 -> IngredientScreen(modifier,navController,authViewModel)
+        2 -> IngredientScreen(modifier,navController,authViewModel,ingredientViewModel)
         3 -> NutritionTrackerScreen(modifier,navController,authViewModel)
         4 -> ProfileScreen(modifier,navController,authViewModel)
     }
