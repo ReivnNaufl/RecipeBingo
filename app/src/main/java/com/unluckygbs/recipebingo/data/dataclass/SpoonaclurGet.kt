@@ -1,7 +1,9 @@
 package com.unluckygbs.recipebingo.data.dataclass
 
+import android.icu.text.CaseMap.Title
 import com.google.gson.annotations.SerializedName
 import com.unluckygbs.recipebingo.data.entity.IngredientEntity
+import com.unluckygbs.recipebingo.data.entity.RecipeEntity
 
 data class SpoonacularApiResponse(
     val message: String,
@@ -10,6 +12,10 @@ data class SpoonacularApiResponse(
 
 data class SearchIngredient(
     @SerializedName("results") val results: List<Ingredient>
+)
+
+data class SearchRecipe(
+    @SerializedName("results") val results: List<Recipe> = emptyList()
 )
 
 data class Ingredient(
@@ -33,3 +39,9 @@ fun Ingredient.toEntity(): IngredientEntity {
         image = this.image
     )
 }
+
+data class Recipe(
+    @SerializedName("id") val id: Int,
+    @SerializedName("title") val title: String,
+    @SerializedName("image") val image: String
+)
