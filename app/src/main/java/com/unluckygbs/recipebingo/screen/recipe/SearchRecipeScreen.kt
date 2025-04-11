@@ -49,7 +49,7 @@ import coil.compose.AsyncImage
 import com.unluckygbs.recipebingo.data.dataclass.Recipe
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
-import com.unluckygbs.recipebingo.viewmodel.ingredient.RecipeViewModel
+import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -36,7 +36,7 @@ import com.unluckygbs.recipebingo.screen.recipe.SearchRecipeScreen
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModelFactory
-import com.unluckygbs.recipebingo.viewmodel.ingredient.RecipeViewModel
+import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
 
 @Composable
 fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,ingredientRepository: IngredientRepository) {

@@ -1,11 +1,11 @@
-package com.unluckygbs.recipebingo.viewmodel.ingredient
+package com.unluckygbs.recipebingo.viewmodel.recipe
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.unluckygbs.recipebingo.data.KeyClient
-import com.unluckygbs.recipebingo.data.SpoonacularClient
+import com.unluckygbs.recipebingo.data.client.KeyClient
+import com.unluckygbs.recipebingo.data.client.SpoonacularClient
 import com.unluckygbs.recipebingo.data.dataclass.Recipe
 import kotlinx.coroutines.launch
 
