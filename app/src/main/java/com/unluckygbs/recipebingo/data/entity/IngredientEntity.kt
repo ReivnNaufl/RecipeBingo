@@ -11,3 +11,7 @@ data class IngredientEntity(
     val unit: String,
     val image: String,
 )
+{
+    // Required for Firestore deserialization
+    constructor() : this(0, "", 0.0, "","")
+}
