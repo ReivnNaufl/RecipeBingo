@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
@@ -77,8 +78,8 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, aut
              onValueChange = {
                  email = it
              },
-             label = {Text(text = "Email")
-             }
+             label = {Text(text = "Email") },
+             shape = RoundedCornerShape(12.dp)
          )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -88,8 +89,8 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, aut
             onValueChange = {
                 password = it
             },
-            label = {Text(text = "Password")
-            },
+            label = {Text(text = "Password") },
+            shape = RoundedCornerShape(12.dp),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 val image = if (passwordVisible)

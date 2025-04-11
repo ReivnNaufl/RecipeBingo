@@ -36,6 +36,7 @@ import com.unluckygbs.recipebingo.screen.recipe.SearchRecipeScreen
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModelFactory
+import com.unluckygbs.recipebingo.viewmodel.ingredient.RecipeViewModel
 
 @Composable
 fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,ingredientRepository: IngredientRepository) {
@@ -43,6 +44,7 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,ingredientR
     val ingredientViewModel: IngredientViewModel = viewModel(
         factory = IngredientViewModelFactory(ingredientRepository)
     )
+    val recipeViewModel: RecipeViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "login", builder = {
         composable("login"){
@@ -52,7 +54,7 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,ingredientR
             RegisterScreen(modifier,navController,authViewModel)
         }
         composable("home"){
-            App(modifier,navController,authViewModel,ingredientViewModel)
+            App(modifier,navController,authViewModel,ingredientViewModel, recipeViewModel)
         }
         composable("searchingredient") {
             SearchIngredientScreen(modifier,navController,authViewModel,ingredientViewModel)
@@ -61,7 +63,7 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,ingredientR
 }
 
 @Composable
-fun App(modifier: Modifier = Modifier,navController: NavController, authViewModel: AuthViewModel,ingredientViewModel: IngredientViewModel) {
+fun App(modifier: Modifier = Modifier,navController: NavController, authViewModel: AuthViewModel,ingredientViewModel: IngredientViewModel, recipeViewModel: RecipeViewModel) {
 
     val navItemList = listOf(
         NavItem("Home", Icons.Default.Home),
@@ -97,15 +99,15 @@ fun App(modifier: Modifier = Modifier,navController: NavController, authViewMode
             }
         }
         ) { innerPadding ->
-        ContentScreen(modifier = Modifier.padding(innerPadding), navController = navController, authViewModel = authViewModel,selectedIndex, ingredientViewModel = ingredientViewModel )
+        ContentScreen(modifier = Modifier.padding(innerPadding), navController = navController, authViewModel = authViewModel,selectedIndex, ingredientViewModel = ingredientViewModel, recipeViewModel = recipeViewModel)
     }
 }
 
 @Composable
-fun ContentScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, selectedIndex : Int,ingredientViewModel: IngredientViewModel) {
+fun ContentScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, selectedIndex : Int,ingredientViewModel: IngredientViewModel, recipeViewModel: RecipeViewModel) {
     when(selectedIndex){
         0 -> HomeScreen(modifier,navController,authViewModel)
-        1 -> SearchRecipeScreen(modifier,navController,authViewModel)
+        1 -> SearchRecipeScreen(modifier,navController,authViewModel,recipeViewModel)
         2 -> IngredientScreen(modifier,navController,authViewModel,ingredientViewModel)
         3 -> NutritionTrackerScreen(modifier,navController,authViewModel)
         4 -> ProfileScreen(modifier,navController,authViewModel)

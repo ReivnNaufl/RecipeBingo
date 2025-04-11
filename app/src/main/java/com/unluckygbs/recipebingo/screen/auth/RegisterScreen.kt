@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
@@ -76,8 +77,9 @@ fun RegisterScreen(modifier: Modifier = Modifier, navController: NavController, 
                 email = it
             },
             label = {
-                Text(text = "Email")
-            }
+                Text(text = "Enter Your Email")
+            },
+            shape = RoundedCornerShape(12.dp)
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -88,8 +90,9 @@ fun RegisterScreen(modifier: Modifier = Modifier, navController: NavController, 
                 password = it
             },
             label = {
-                Text(text = "Password")
+                Text(text = "Enter Your Password")
             },
+            shape = RoundedCornerShape(12.dp),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 val image = if (passwordVisible)
