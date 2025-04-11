@@ -1,9 +1,8 @@
-package com.unluckygbs.recipebingo.data
+package com.unluckygbs.recipebingo.data.apiservice
 
 import com.unluckygbs.recipebingo.data.dataclass.KeyApiResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
-import com.unluckygbs.recipebingo.BuildConfig
 
 
 interface KeyApiService {

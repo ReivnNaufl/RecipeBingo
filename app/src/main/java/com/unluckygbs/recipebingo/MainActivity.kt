@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.unluckygbs.recipebingo.data.database.AppDatabase
 import com.unluckygbs.recipebingo.repository.IngredientRepository
 import com.unluckygbs.recipebingo.ui.theme.RecipeBingoTheme
@@ -20,7 +22,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val authViewModel : AuthViewModel by viewModels()
-        val ingredientRepository = IngredientRepository(AppDatabase.getDatabase(this).ingredientDao())
+        val firestore = FirebaseFirestore.getInstance()
+        val ingredientRepository = IngredientRepository(AppDatabase.getDatabase(this).ingredientDao(), firestore = firestore, userId = authViewModel.getCurrentUserUid() ?: "")
         setContent {
             RecipeBingoTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->

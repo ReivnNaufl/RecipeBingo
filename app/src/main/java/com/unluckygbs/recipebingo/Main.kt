@@ -46,7 +46,7 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,ingredientR
 
     NavHost(navController = navController, startDestination = "login", builder = {
         composable("login"){
-            LoginScreen(modifier,navController,authViewModel)
+            LoginScreen(modifier,navController,authViewModel,ingredientViewModel)
         }
         composable("register"){
             RegisterScreen(modifier,navController,authViewModel)

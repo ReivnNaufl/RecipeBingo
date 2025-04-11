@@ -63,6 +63,11 @@ class AuthViewModel : ViewModel() {
         }
 
     }
+
+    fun getCurrentUserUid(): String? {
+        return auth.currentUser?.uid
+    }
+
 }
 
 sealed class AuthState{

@@ -1,11 +1,10 @@
 package com.unluckygbs.recipebingo.viewmodel.ingredient
 
 import androidx.lifecycle.*
-import com.unluckygbs.recipebingo.data.SpoonacularClient
+import com.unluckygbs.recipebingo.data.client.SpoonacularClient
 import com.unluckygbs.recipebingo.data.dataclass.Ingredient
 import kotlinx.coroutines.launch
-import com.unluckygbs.recipebingo.BuildConfig
-import com.unluckygbs.recipebingo.data.KeyClient
+import com.unluckygbs.recipebingo.data.client.KeyClient
 import com.unluckygbs.recipebingo.data.entity.IngredientEntity
 import com.unluckygbs.recipebingo.repository.IngredientRepository
 
@@ -44,7 +43,7 @@ class IngredientViewModel(private val ingredientRepository: IngredientRepository
     fun insertIngredient(ingredient: IngredientEntity) {
         viewModelScope.launch {
             try {
-                ingredientRepository.insert(ingredient)
+                ingredientRepository.insertIngredient(ingredient)
             } catch (e: Exception) {
                 _errorMessage.value = "Gagal menambahkan: ${e.message}"
             }
@@ -54,7 +53,7 @@ class IngredientViewModel(private val ingredientRepository: IngredientRepository
     fun deleteIngredient(ingredient: IngredientEntity) {
         viewModelScope.launch {
             try {
-                ingredientRepository.delete(ingredient)
+                ingredientRepository.deleteIngredient(ingredient)
             } catch (e: Exception) {
                 _errorMessage.value = "Gagal menambahkan: ${e.message}"
             }
@@ -64,10 +63,16 @@ class IngredientViewModel(private val ingredientRepository: IngredientRepository
     fun updateIngredient(ingredient: IngredientEntity) {
         viewModelScope.launch {
             try {
-                ingredientRepository.update(ingredient)
+                ingredientRepository.updateIngredientQuantity(ingredient)
             } catch (e: Exception) {
                 _errorMessage.value = "Gagal menambahkan: ${e.message}"
             }
+        }
+    }
+
+    fun syncFromFirestore() {
+        viewModelScope.launch {
+            ingredientRepository.syncFromFirestoreToRoom()
         }
     }
 

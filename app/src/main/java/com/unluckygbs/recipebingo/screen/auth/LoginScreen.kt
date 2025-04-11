@@ -33,9 +33,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.navigation.NavController
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
+import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
+fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel,ingredientViewModel: IngredientViewModel) {
 
     var email by remember{
         mutableStateOf("")
@@ -55,7 +56,10 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, aut
 
     LaunchedEffect(authState.value) {
         when(authState.value){
-            is AuthState.Authenticated -> navController.navigate("home")
+            is AuthState.Authenticated -> {
+                ingredientViewModel.syncFromFirestore()
+                navController.navigate("home")
+            }
             is AuthState.Error -> Toast.makeText(context,
                 (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()
             else -> Unit
