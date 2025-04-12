@@ -15,6 +15,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -41,8 +43,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -64,6 +68,8 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
     val errorMessage by recipeViewModel.errorMessage.observeAsState()
 
     var searchQuery by remember { mutableStateOf("") }
+
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(authState.value) {
         when(authState.value){
@@ -129,6 +135,17 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                         )
                     }
                 },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Search
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        if (searchQuery.isNotBlank()) {
+                            recipeViewModel.fetchRecipe(searchQuery)
+                            keyboardController?.hide()
+                        }
+                    }
+                ),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     containerColor = Color(0xFFA8F0B8),
                     focusedBorderColor = Color.Transparent,
