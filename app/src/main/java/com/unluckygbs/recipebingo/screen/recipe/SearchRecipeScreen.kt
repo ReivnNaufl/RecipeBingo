@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,7 +41,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -101,9 +104,19 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                     searchQuery = it
                     recipeViewModel.fetchRecipe(searchQuery)
                 },
-                placeholder = { Text("Search...") },
-                leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "Search Icon")
+                placeholder = {
+                    Text("Search...",
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                    )
+                },
+                trailingIcon = {
+                    Row(
+                        modifier = Modifier
+                            .padding(end = 30.dp)
+                    ) {
+                        Icon(Icons.Default.Search, contentDescription = "Search Icon")
+                    }
                 },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     containerColor = Color(0xFFA8F0B8),
@@ -111,6 +124,7 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                     unfocusedBorderColor = Color.Transparent
                 ),
                 shape = RoundedCornerShape(50),
+                textStyle = TextStyle(textIndent = TextIndent(firstLine = 17.sp)),
                 modifier = Modifier
                     .width(330.dp)
                     .height(56.dp)
