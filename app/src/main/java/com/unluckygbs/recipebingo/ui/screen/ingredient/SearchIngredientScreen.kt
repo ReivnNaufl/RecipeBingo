@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.unluckygbs.recipebingo.screen.ingredient
+package com.unluckygbs.recipebingo.ui.screen.ingredient
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

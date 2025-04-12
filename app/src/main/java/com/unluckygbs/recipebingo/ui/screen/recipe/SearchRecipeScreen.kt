@@ -1,4 +1,4 @@
-package com.unluckygbs.recipebingo.screen.recipe
+package com.unluckygbs.recipebingo.ui.screen.recipe
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -1,4 +1,4 @@
-package com.unluckygbs.recipebingo.screen.ingredient
+package com.unluckygbs.recipebingo.ui.screen.ingredient
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -36,6 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import com.unluckygbs.recipebingo.data.dataclass.Ingredient
 import com.unluckygbs.recipebingo.data.entity.IngredientEntity
 import kotlinx.coroutines.launch
@@ -51,6 +52,7 @@ fun IngredientScreen(
     ingredientViewModel: IngredientViewModel
 ) {
     val authState = authViewModel.authState.observeAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(authState.value) {
         if (authState.value is AuthState.unAuthenticated) {
@@ -66,7 +68,7 @@ fun IngredientScreen(
         AvailableIngredientsScreen(navController, ingredientViewModel)
 
         TextButton(onClick = {
-            authViewModel.signout()
+            authViewModel.signout(context)
         }) {
             Text(text = "Log Out")
         }

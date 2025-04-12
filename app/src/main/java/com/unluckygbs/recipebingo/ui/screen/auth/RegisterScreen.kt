@@ -1,4 +1,4 @@
-package com.unluckygbs.recipebingo.screen.auth
+package com.unluckygbs.recipebingo.ui.screen.auth
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement

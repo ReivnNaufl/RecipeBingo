@@ -5,6 +5,8 @@ plugins {
     id("com.google.gms.google-services")
 
     id("kotlin-kapt")
+
+    id("dagger.hilt.android.plugin")
 }
 
 val apiKey: String = project.findProperty("API_KEY") as String? ?: "default-api-key"
@@ -98,5 +100,11 @@ dependencies {
     kapt("androidx.room:room-compiler:2.6.1")
 
     implementation("androidx.compose.material:material:1.6.1")
+
+    implementation("com.google.dagger:hilt-android:2.48")
+    kapt("com.google.dagger:hilt-compiler:2.48")
+    
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:20.2.0")
 
 }
