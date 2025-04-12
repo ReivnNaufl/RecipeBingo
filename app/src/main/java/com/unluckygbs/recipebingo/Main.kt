@@ -33,6 +33,7 @@ import com.unluckygbs.recipebingo.ui.screen.tracker.NutritionTrackerScreen
 import com.unluckygbs.recipebingo.ui.screen.profile.ProfileScreen
 import com.unluckygbs.recipebingo.ui.screen.auth.RegisterScreen
 import com.unluckygbs.recipebingo.ui.screen.recipe.SearchRecipeScreen
+import com.unluckygbs.recipebingo.ui.screen.start.StartScreen
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModelFactory
@@ -46,7 +47,10 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,ingredientR
     )
     val recipeViewModel: RecipeViewModel = viewModel()
 
-    NavHost(navController = navController, startDestination = "login", builder = {
+    NavHost(navController = navController, startDestination = "Start", builder = {
+        composable("Start"){
+            StartScreen(modifier,navController,authViewModel,ingredientViewModel)
+        }
         composable("login"){
             LoginScreen(modifier,navController,authViewModel,ingredientViewModel)
         }
