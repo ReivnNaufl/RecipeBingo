@@ -32,6 +32,7 @@ import com.unluckygbs.recipebingo.ui.screen.auth.LoginScreen
 import com.unluckygbs.recipebingo.ui.screen.tracker.NutritionTrackerScreen
 import com.unluckygbs.recipebingo.ui.screen.profile.ProfileScreen
 import com.unluckygbs.recipebingo.ui.screen.auth.RegisterScreen
+import com.unluckygbs.recipebingo.ui.screen.onboarding.OnboardingScreen
 import com.unluckygbs.recipebingo.ui.screen.recipe.SearchRecipeScreen
 import com.unluckygbs.recipebingo.ui.screen.start.StartScreen
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
@@ -40,16 +41,24 @@ import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModelFactor
 import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
 
 @Composable
-fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,ingredientRepository: IngredientRepository) {
+fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,ingredientRepository: IngredientRepository, startDestination: String, onOnboardingFinished: () -> Unit) {
     val navController = rememberNavController()
     val ingredientViewModel: IngredientViewModel = viewModel(
         factory = IngredientViewModelFactory(ingredientRepository)
     )
     val recipeViewModel: RecipeViewModel = viewModel()
 
-    NavHost(navController = navController, startDestination = "Start", builder = {
+    NavHost(navController = navController, startDestination = startDestination, builder = {
         composable("Start"){
             StartScreen(modifier,navController,authViewModel,ingredientViewModel)
+        }
+        composable("onboarding") {
+            OnboardingScreen(navController = navController, onFinish = {
+                onOnboardingFinished()
+                navController.navigate("Start") {
+                    popUpTo("onboarding") { inclusive = true }
+                }
+            })
         }
         composable("login"){
             LoginScreen(modifier,navController,authViewModel,ingredientViewModel)
