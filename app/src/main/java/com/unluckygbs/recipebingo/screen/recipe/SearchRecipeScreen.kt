@@ -4,12 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -102,7 +102,6 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                 value = searchQuery,
                 onValueChange = {
                     searchQuery = it
-                    recipeViewModel.fetchRecipe(searchQuery)
                 },
                 placeholder = {
                     Text("Search...",
@@ -111,11 +110,18 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                     )
                 },
                 trailingIcon = {
-                    Row(
-                        modifier = Modifier
-                            .padding(end = 30.dp)
+                    IconButton(onClick = {
+                        if (searchQuery.isNotBlank()) {
+                            recipeViewModel.fetchRecipe(searchQuery)
+                        }
+                    }, modifier = Modifier
+                        .padding(end = 16.dp)
                     ) {
-                        Icon(Icons.Default.Search, contentDescription = "Search Icon")
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search Icon",
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -189,7 +195,7 @@ fun RecipeResultItem(recipe: Recipe) {
             text = recipe.title,
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
-            maxLines = 1,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
     }
