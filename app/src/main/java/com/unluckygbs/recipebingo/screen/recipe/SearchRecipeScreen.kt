@@ -72,6 +72,11 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
         }
     }
 
+    LaunchedEffect(Unit) {
+        recipeViewModel.resetState()
+        searchQuery = ""
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(

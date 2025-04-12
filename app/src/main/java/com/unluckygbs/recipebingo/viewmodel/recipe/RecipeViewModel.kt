@@ -40,4 +40,10 @@ class RecipeViewModel : ViewModel() {
             }
         }
     }
+
+    fun resetState() {
+        _recipe.value = emptyList()
+        _errorMessage.value = null
+        _loading.value = false
+    }
 }
