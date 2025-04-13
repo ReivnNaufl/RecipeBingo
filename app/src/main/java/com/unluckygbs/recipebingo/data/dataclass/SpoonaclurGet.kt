@@ -18,6 +18,10 @@ data class SearchRecipe(
     @SerializedName("results") val results: List<Recipe> = emptyList()
 )
 
+data class RandomRecipeResponse(
+    @SerializedName("recipes") val randomResults: List<Recipe> = emptyList()
+)
+
 data class Ingredient(
     @SerializedName("id") val id: Int,
     @SerializedName("name") val name: String,

@@ -1,5 +1,6 @@
 package com.unluckygbs.recipebingo.data.apiservice
 
+import com.unluckygbs.recipebingo.data.dataclass.RandomRecipeResponse
 import com.unluckygbs.recipebingo.data.dataclass.SpoonacularApiResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -21,5 +22,11 @@ interface SpoonacularApiService {
         @Query("query") query: String,
         @Query("metaInformation") metaInformation: Boolean = true,
     ): SearchIngredient
+    @GET("recipes/random?")
+    suspend fun getRandomRecipeData(
+        @Query("apiKey") apiKey: String,
+        @Query("number") number: Int = 3,
+        @Query("metaInformation") metaInformation: Boolean = true
+    ): RandomRecipeResponse
 }
 

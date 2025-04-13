@@ -20,6 +20,9 @@ class RecipeViewModel : ViewModel() {
     private val _errorMessage = MutableLiveData<String?>(null)
     val errorMessage: LiveData<String?> = _errorMessage
 
+    private val _recommendedRecipes = MutableLiveData<List<Recipe>>(emptyList())
+    val recommendedRecipes: LiveData<List<Recipe>> = _recommendedRecipes
+
     fun fetchRecipe(query: String) {
         viewModelScope.launch {
             _loading.value = true
@@ -41,8 +44,32 @@ class RecipeViewModel : ViewModel() {
         }
     }
 
+    fun fetchRandomRecipes() {
+        viewModelScope.launch {
+            _loading.value = true
+            _errorMessage.value = null
+            _recipe.value = emptyList()
+
+            try {
+                val keyResponse = KeyClient.apiService.getapikey()
+                val apiKey = keyResponse.key
+
+                val response = SpoonacularClient.apiService.getRandomRecipeData(
+                    apiKey = apiKey,
+                )
+
+                _recommendedRecipes.value = response.randomResults
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to load recommended recipes."
+            } finally {
+                _loading.value = false
+            }
+        }
+    }
+
     fun resetState() {
         _recipe.value = emptyList()
+        _recommendedRecipes.value = emptyList()
         _errorMessage.value = null
         _loading.value = false
     }

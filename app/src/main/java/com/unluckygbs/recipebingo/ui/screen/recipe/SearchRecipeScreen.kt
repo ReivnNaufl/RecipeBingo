@@ -8,10 +8,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +24,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -66,6 +71,7 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
     val recipe by recipeViewModel.recipe.observeAsState(emptyList())
     val isLoading by recipeViewModel.loading.observeAsState(false)
     val errorMessage by recipeViewModel.errorMessage.observeAsState()
+    val recommended by recipeViewModel.recommendedRecipes.observeAsState(emptyList())
 
     var searchQuery by remember { mutableStateOf("") }
 
@@ -160,23 +166,58 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            when {
-                isLoading -> {
-                    CircularProgressIndicator()
+            if (isLoading) {
+                CircularProgressIndicator()
+            } else if (errorMessage != null) {
+                Text(
+                    text = errorMessage ?: "",
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            } else if (recipe.isEmpty()) {
+                Text("Or get a recommendation 👇", color = Color.Gray)
+                if (recommended.isEmpty()) {
+                    RecommendationButton(onClick = {
+                        recipeViewModel.fetchRandomRecipes()
+                    })
                 }
 
-                errorMessage != null -> {
-                    Text(
-                        text = errorMessage ?: "",
-                        color = Color.Red,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-
-                else -> {
+                if (recommended.isNotEmpty()) {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(3),
                         modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(recommended) { recipe ->
+                            RecipeResultItem(recipe)
+                        }
+
+                        item(span = { GridItemSpan(3) }) {
+                            Button(
+                                onClick = { recipeViewModel.fetchRandomRecipes() },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00D45B)),
+                                shape = RoundedCornerShape(50),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp)
+                            ) {
+                                Text("Try another recommendation", color = Color.White)
+                            }
+                        }
+                    }
+                }
+            } else {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(3),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
                         contentPadding = PaddingValues(8.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -185,11 +226,20 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                             RecipeResultItem(recipe)
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text("Or get a recommendation 👇", color = Color.Gray)
+                    RecommendationButton(
+                        onClick = { recipeViewModel.fetchRandomRecipes() },
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun RecipeResultItem(recipe: Recipe) {
@@ -222,3 +272,16 @@ fun RecipeResultItem(recipe: Recipe) {
         )
     }
 }
+
+@Composable
+fun RecommendationButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00D45B)),
+        shape = RoundedCornerShape(50),
+        modifier = modifier.padding(vertical = 16.dp)
+    ) {
+        Text("Recommend me a recipe", color = Color.White)
+    }
+}
+
