@@ -1,5 +1,6 @@
 package com.unluckygbs.recipebingo
 
+import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -14,7 +15,9 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -24,6 +27,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.firestore.FirebaseFirestore
+import com.unluckygbs.recipebingo.data.database.AppDatabase
 import com.unluckygbs.recipebingo.repository.IngredientRepository
 import com.unluckygbs.recipebingo.ui.screen.ingredient.SearchIngredientScreen
 import com.unluckygbs.recipebingo.ui.screen.home.HomeScreen
@@ -35,18 +40,29 @@ import com.unluckygbs.recipebingo.ui.screen.auth.RegisterScreen
 import com.unluckygbs.recipebingo.ui.screen.onboarding.OnboardingScreen
 import com.unluckygbs.recipebingo.ui.screen.recipe.SearchRecipeScreen
 import com.unluckygbs.recipebingo.ui.screen.start.StartScreen
+import com.unluckygbs.recipebingo.util.DataStoreManager
+import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModelFactory
 import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
 
 @Composable
-fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,ingredientRepository: IngredientRepository, startDestination: String, onOnboardingFinished: () -> Unit) {
+fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Context, startDestination: String, onOnboardingFinished: () -> Unit) {
+    val firestore = FirebaseFirestore.getInstance()
+    val ingredientRepository = IngredientRepository(AppDatabase.getDatabase(context).ingredientDao(), firestore = firestore, userId = authViewModel.getCurrentUserUid() ?: "")
+
     val navController = rememberNavController()
     val ingredientViewModel: IngredientViewModel = viewModel(
         factory = IngredientViewModelFactory(ingredientRepository)
     )
     val recipeViewModel: RecipeViewModel = viewModel()
+
+    val authState by authViewModel.authState.observeAsState()
+
+    LaunchedEffect(authState) {
+        ingredientRepository.syncFromFirestoreToRoom()
+    }
 
     NavHost(navController = navController, startDestination = startDestination, builder = {
         composable("Start"){

@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
                         Main(
                             modifier = Modifier.padding(innerPadding),
                             authViewModel = authViewModel,
-                            ingredientRepository = ingredientRepository,
+                            context = this,
                             startDestination = startDestination,
                             onOnboardingFinished = {
                                 lifecycleScope.launch {

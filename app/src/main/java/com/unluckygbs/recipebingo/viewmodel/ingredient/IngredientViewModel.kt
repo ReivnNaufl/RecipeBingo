@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import com.unluckygbs.recipebingo.data.client.KeyClient
 import com.unluckygbs.recipebingo.data.entity.IngredientEntity
 import com.unluckygbs.recipebingo.repository.IngredientRepository
+import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 
 class IngredientViewModel(private val ingredientRepository: IngredientRepository) : ViewModel() {
 
