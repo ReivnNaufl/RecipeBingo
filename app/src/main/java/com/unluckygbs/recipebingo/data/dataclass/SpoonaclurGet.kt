@@ -71,5 +71,26 @@ data class RecipeById(
     @SerializedName("title") val title: String,
     @SerializedName("image") val image: String,
     @SerializedName("extendedIngredients") val extendedIngredients: List<RecipeIngredient>,
+    @SerializedName("nutrition") val nutrition :Nutrition,
+    @SerializedName("analyzedInstructions") val analyzedInstruction: List<AnalyzedInstruction>
 )
 
+data class Nutrition(
+    @SerializedName("nutrient") val nutrient: List<Nutrient>
+)
+
+data class Nutrient(
+    @SerializedName("name") val name: String,
+    @SerializedName("amount") val amount: Double,
+    @SerializedName("unit") val unit: String,
+)
+
+data class AnalyzedInstruction(
+    @SerializedName("name") val name: String?,
+    @SerializedName("steps") val steps: List<InstructionStep>
+)
+
+data class InstructionStep(
+    @SerializedName("number") val number: Int,
+    @SerializedName("step") val step: String
+)
