@@ -1,6 +1,7 @@
 package com.unluckygbs.recipebingo.ui.screen.recipe
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -192,6 +193,9 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                     ) {
                         items(recommended) { recipe ->
                             RecipeResultItem(recipe)
+                            {
+                                navController.navigate("detailedrecipe/${recipe.id}")
+                            }
                         }
 
                         item(span = { GridItemSpan(3) }) {
@@ -224,6 +228,9 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                     ) {
                         items(items = recipe) { recipe ->
                             RecipeResultItem(recipe)
+                            {
+                                navController.navigate("detailedrecipe/${recipe.id}")
+                            }
                         }
                     }
 
@@ -242,11 +249,14 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
 
 
 @Composable
-fun RecipeResultItem(recipe: Recipe) {
-
+fun RecipeResultItem(
+    recipe: Recipe,
+    onClick: () -> Unit // tambahkan parameter onClick
+) {
     Column(
         modifier = Modifier
             .width(110.dp)
+            .clickable { onClick() }
             .clip(RoundedCornerShape(16.dp))
             .background(Color(0xFFF1F1F1))
             .padding(8.dp)
@@ -272,6 +282,7 @@ fun RecipeResultItem(recipe: Recipe) {
         )
     }
 }
+
 
 @Composable
 fun RecommendationButton(onClick: () -> Unit, modifier: Modifier = Modifier) {

@@ -1,6 +1,7 @@
 package com.unluckygbs.recipebingo
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -16,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -38,6 +40,7 @@ import com.unluckygbs.recipebingo.ui.screen.tracker.NutritionTrackerScreen
 import com.unluckygbs.recipebingo.ui.screen.profile.ProfileScreen
 import com.unluckygbs.recipebingo.ui.screen.auth.RegisterScreen
 import com.unluckygbs.recipebingo.ui.screen.onboarding.OnboardingScreen
+import com.unluckygbs.recipebingo.ui.screen.recipe.RecipeDetailScreen
 import com.unluckygbs.recipebingo.ui.screen.recipe.SearchRecipeScreen
 import com.unluckygbs.recipebingo.ui.screen.start.StartScreen
 import com.unluckygbs.recipebingo.util.DataStoreManager
@@ -87,6 +90,24 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
         }
         composable("searchingredient") {
             SearchIngredientScreen(modifier,navController,authViewModel,ingredientViewModel)
+        }
+        composable("detailedrecipe/{recipeId}") { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getString("recipeId")?.toIntOrNull()
+
+
+            LaunchedEffect(recipeId) {
+                if (recipeId != null) {
+                    recipeViewModel.getRecipeById(recipeId)
+                }
+            }
+
+            val recipe by recipeViewModel.recipeById.collectAsState()
+
+
+            RecipeDetailScreen(
+                recipeById = recipe,
+                onBackClick = { navController.popBackStack() }
+            )
         }
     })
 }

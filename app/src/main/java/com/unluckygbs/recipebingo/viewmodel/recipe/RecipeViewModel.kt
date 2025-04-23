@@ -1,5 +1,6 @@
 package com.unluckygbs.recipebingo.viewmodel.recipe
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -7,12 +8,18 @@ import androidx.lifecycle.viewModelScope
 import com.unluckygbs.recipebingo.data.client.KeyClient
 import com.unluckygbs.recipebingo.data.client.SpoonacularClient
 import com.unluckygbs.recipebingo.data.dataclass.Recipe
+import com.unluckygbs.recipebingo.data.dataclass.RecipeById
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class RecipeViewModel : ViewModel() {
 
     private val _recipe = MutableLiveData<List<Recipe>>(emptyList())
     val recipe: LiveData<List<Recipe>> = _recipe
+
+    private val _recipebyid = MutableStateFlow<RecipeById?>(null)
+    val recipeById: StateFlow<RecipeById?> = _recipebyid
 
     private val _loading = MutableLiveData(false)
     val loading: LiveData<Boolean> = _loading
@@ -61,6 +68,31 @@ class RecipeViewModel : ViewModel() {
                 _recommendedRecipes.value = response.randomResults
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to load recommended recipes."
+            } finally {
+                _loading.value = false
+            }
+        }
+    }
+
+    fun getRecipeById(Id: Int) {
+        Log.d("DetailRecipeDebug", "Fetching recipe with id: $Id")
+        viewModelScope.launch {
+            _loading.value = true
+            _errorMessage.value = null
+            try {
+                val keyResponse = KeyClient.apiService.getapikey()
+                val apiKey = keyResponse.key
+
+                val response = SpoonacularClient.apiService.getRecipeById(
+                    apiKey = apiKey,
+                    id = Id
+                )
+                Log.d("DetailRecipeDebug", "API response: $response")
+
+                _recipebyid.value = response
+            } catch (e: Exception) {
+                Log.e("DetailRecipeDebug", "Error: ${e.localizedMessage}")
+                _errorMessage.value = "No Connection."
             } finally {
                 _loading.value = false
             }

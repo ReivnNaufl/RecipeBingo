@@ -22,6 +22,7 @@ data class RandomRecipeResponse(
     @SerializedName("recipes") val randomResults: List<Recipe> = emptyList()
 )
 
+
 data class Ingredient(
     @SerializedName("id") val id: Int,
     @SerializedName("name") val name: String,
@@ -49,3 +50,26 @@ data class Recipe(
     @SerializedName("title") val title: String,
     @SerializedName("image") val image: String
 )
+
+data class RecipeIngredient(
+    @SerializedName("name") val name: String,
+    @SerializedName("original") val original: String,
+    @SerializedName("measures") val measures: IngredientMeasure,
+)
+
+data class IngredientMeasure(
+    @SerializedName("metric") val metric: IngredientMetric,
+)
+
+data class IngredientMetric(
+    @SerializedName("amount") val amount: Double,
+    @SerializedName("unitLong") val unitLong: String,
+)
+
+data class RecipeById(
+    @SerializedName("id") val id: Int,
+    @SerializedName("title") val title: String,
+    @SerializedName("image") val image: String,
+    @SerializedName("extendedIngredients") val extendedIngredients: List<RecipeIngredient>,
+)
+
