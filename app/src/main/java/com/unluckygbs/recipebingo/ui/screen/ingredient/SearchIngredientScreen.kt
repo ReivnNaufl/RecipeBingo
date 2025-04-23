@@ -2,6 +2,7 @@
 
 package com.unluckygbs.recipebingo.ui.screen.ingredient
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -45,6 +46,13 @@ fun SearchIngredientScreen(
 
 
     var searchQuery by remember { mutableStateOf("") }
+
+//    BackHandler {
+//        navController.navigate("ingredient") {
+//            popUpTo("ingredient") { inclusive = true }
+//        }
+//    }
+
 
     LaunchedEffect(authState.value) {
         if (authState.value is AuthState.unAuthenticated) {

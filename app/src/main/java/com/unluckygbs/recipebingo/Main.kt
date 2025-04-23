@@ -48,6 +48,7 @@ import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModelFactory
+import com.unluckygbs.recipebingo.viewmodel.main.MainViewModel
 import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
 
 @Composable
@@ -113,7 +114,14 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
 }
 
 @Composable
-fun App(modifier: Modifier = Modifier,navController: NavController, authViewModel: AuthViewModel,ingredientViewModel: IngredientViewModel, recipeViewModel: RecipeViewModel) {
+fun App(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    authViewModel: AuthViewModel,
+    ingredientViewModel: IngredientViewModel,
+    recipeViewModel: RecipeViewModel,
+    mainViewModel: MainViewModel = viewModel()
+) {
 
     val navItemList = listOf(
         NavItem("Home", Icons.Default.Home),
@@ -123,9 +131,8 @@ fun App(modifier: Modifier = Modifier,navController: NavController, authViewMode
         NavItem("Profile", Icons.Default.AccountCircle)
     )
 
-    var selectedIndex by remember {
-        mutableIntStateOf(0)
-    }
+    val selectedIndex by mainViewModel.selectedIndex
+
 
     Scaffold (
         modifier = Modifier.fillMaxSize(),
@@ -134,9 +141,7 @@ fun App(modifier: Modifier = Modifier,navController: NavController, authViewMode
                 navItemList.forEachIndexed{index, navItem ->
                     NavigationBarItem(
                         selected = selectedIndex == index,
-                        onClick = {
-                            selectedIndex = index
-                        },
+                        onClick = { mainViewModel.setSelectedIndex(index) },
                         icon = {
                             Icon(imageVector = navItem.icon, "icon")
                                },
