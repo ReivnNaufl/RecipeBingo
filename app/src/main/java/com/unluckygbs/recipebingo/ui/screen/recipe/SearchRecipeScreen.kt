@@ -3,6 +3,7 @@ package com.unluckygbs.recipebingo.ui.screen.recipe
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -388,26 +390,33 @@ fun RecipeRecommendationBottomSheet(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Based on available ingredients
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterStart
         ) {
-            val isWithSelected = selectedFilters.contains("with")
-            FilterChip(
-                text = "Based on available Ingredients",
-                selected = isWithSelected,
-                onClick = {
-                    onFilterClick(if (isWithSelected) "without" else "with")
-                }
-            )
+            Row(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val isWithSelected = selectedFilters.contains("with")
+                FilterChip(
+                    text = "Based on available Ingredients",
+                    selected = isWithSelected,
+                    onClick = {
+                        onFilterClick(if (isWithSelected) "without" else "with")
+                    }
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         // Min Filters
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             listOf("Min Calorie", "Min Protein", "Min Sugar", "Min Fat").forEach { filter ->
                 FilterChip(
@@ -421,9 +430,10 @@ fun RecipeRecommendationBottomSheet(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Max Filters
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             listOf("Max Calorie", "Max Protein", "Max Sugar", "Max Fat").forEach { filter ->
                 FilterChip(
