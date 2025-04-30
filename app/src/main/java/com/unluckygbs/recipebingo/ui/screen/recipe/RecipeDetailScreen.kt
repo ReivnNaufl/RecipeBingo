@@ -10,6 +10,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,10 +28,33 @@ import coil.compose.AsyncImage
 import com.unluckygbs.recipebingo.R
 import com.unluckygbs.recipebingo.data.dataclass.RecipeById
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
+import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
 
 
 @Composable
 fun RecipeDetailScreen(
+    viewModel: RecipeViewModel,
+    recipeId: Int,
+    onBackClick: () -> Unit = {},
+    onSaveClick: () -> Unit = {},
+    onEatClick: () -> Unit = {}
+) {
+    val recipeById by viewModel.recipeById.collectAsState()
+
+    LaunchedEffect(recipeId) {
+        viewModel.getRecipeById(recipeId) // Ambil data untuk ID baru
+    }
+
+    RecipeDetailScreenContent(
+        recipeById = recipeById,
+        onBackClick = onBackClick,
+        onSaveClick = onSaveClick,
+        onEatClick = onEatClick
+    )
+}
+
+@Composable
+fun RecipeDetailScreenContent(
     onBackClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
     onEatClick: () -> Unit = {},

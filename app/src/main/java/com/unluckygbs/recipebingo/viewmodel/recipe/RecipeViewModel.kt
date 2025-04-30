@@ -78,6 +78,7 @@ class RecipeViewModel(private val ingredientRepository: IngredientRepository): V
     fun getRecipeById(Id: Int) {
         Log.d("DetailRecipeDebug", "Fetching recipe with id: $Id")
         viewModelScope.launch {
+            _recipebyid.value = null
             _loading.value = true
             _errorMessage.value = null
             try {
