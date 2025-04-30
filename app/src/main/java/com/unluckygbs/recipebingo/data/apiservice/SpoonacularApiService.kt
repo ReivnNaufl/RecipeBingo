@@ -1,7 +1,9 @@
 package com.unluckygbs.recipebingo.data.apiservice
 
 import com.unluckygbs.recipebingo.data.dataclass.RandomRecipeResponse
+import com.unluckygbs.recipebingo.data.dataclass.Recipe
 import com.unluckygbs.recipebingo.data.dataclass.RecipeById
+import com.unluckygbs.recipebingo.data.dataclass.RecipeByIngredients
 import com.unluckygbs.recipebingo.data.dataclass.SpoonacularApiResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -37,5 +39,19 @@ interface SpoonacularApiService {
         @Query("metaInformation") metaInformation: Boolean = true,
         @Query("includeNutrition") includeNutrition: Boolean = true,
     ): RecipeById
+    @GET("recipes/complexSearch")
+    suspend fun findRecipesByIngredients(
+        @Query("apiKey") apiKey: String,
+        @Query("includeIngredients") ingredients: String,
+        @Query("minCalories") minCalories: Int? = null,
+        @Query("maxCalories") maxCalories: Int? = null,
+        @Query("minProtein") minProtein: Int? = null,
+        @Query("maxProtein") maxProtein: Int? = null,
+        @Query("minSugar") minSugar: Int? = null,
+        @Query("maxSugar") maxSugar: Int? = null,
+        @Query("minFat") minFat: Int? = null,
+        @Query("maxFat") maxFat: Int? = null,
+        @Query("number") number: Int = 3,
+    ): RecipeByIngredients
 }
 

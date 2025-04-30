@@ -13,32 +13,53 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.unluckygbs.recipebingo.R
 import com.unluckygbs.recipebingo.data.dataclass.RecipeById
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
 import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
 import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModel
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-
 
 @Composable
 fun RecipeDetailScreen(
+    recipeViewModel: RecipeViewModel,
+    recipeId: Int,
+    onBackClick: () -> Unit = {},
+    onSaveClick: () -> Unit = {},
+    nutritionTrackerViewModel: NutritionTrackerViewModel,
+    context: Context
+) {
+    val recipeById by recipeViewModel.recipeById.collectAsState()
+
+    LaunchedEffect(recipeId) {
+        recipeViewModel.getRecipeById(recipeId) // Ambil data untuk ID baru
+    }
+
+    RecipeDetailScreenContent(
+        recipeById = recipeById,
+        onBackClick = onBackClick,
+        onSaveClick = onSaveClick,
+        nutritionTrackerViewModel = nutritionTrackerViewModel,
+        recipeViewModel = recipeViewModel,
+        context = context,
+    )
+}
+
+@Composable
+fun RecipeDetailScreenContent(
     onBackClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
     recipeById: RecipeById?,

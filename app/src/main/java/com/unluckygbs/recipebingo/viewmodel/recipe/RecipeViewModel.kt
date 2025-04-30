@@ -11,12 +11,14 @@ import com.unluckygbs.recipebingo.data.dataclass.Recipe
 import com.unluckygbs.recipebingo.data.dataclass.RecipeById
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
 import com.unluckygbs.recipebingo.data.repository.RecipeRepository
+import com.unluckygbs.recipebingo.repository.IngredientRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class RecipeViewModel(
-    private val recipeRepository: RecipeRepository
+    private val recipeRepository: RecipeRepository,
+    private val ingredientRepository: IngredientRepository
 ) : ViewModel() {
 
     private val _recipe = MutableLiveData<List<Recipe>>(emptyList())
@@ -81,6 +83,7 @@ class RecipeViewModel(
     fun getRecipeById(Id: Int) {
         Log.d("DetailRecipeDebug", "Fetching recipe with id: $Id")
         viewModelScope.launch {
+            _recipebyid.value = null
             _loading.value = true
             _errorMessage.value = null
             try {
@@ -97,6 +100,69 @@ class RecipeViewModel(
             } catch (e: Exception) {
                 Log.e("DetailRecipeDebug", "Error: ${e.localizedMessage}")
                 _errorMessage.value = "No Connection."
+            } finally {
+                _loading.value = false
+            }
+        }
+    }
+
+    fun fetchRecipeByAvailableIngredientswithNutrition(nutrients: Map<String, Int>) {
+        viewModelScope.launch {
+            _loading.value = true
+            _errorMessage.value = null
+            _recipe.value = emptyList()
+
+            try {
+                val apiKey = KeyClient.apiService.getapikey().key
+                val ingredients = ingredientRepository.getIncludeIngredientsQuery()
+
+                val response = SpoonacularClient.apiService.findRecipesByIngredients(
+                    apiKey = apiKey,
+                    ingredients = ingredients,
+                    minCalories = nutrients["minCalories"],
+                    maxCalories = nutrients["maxCalories"],
+                    minProtein = nutrients["minProtein"],
+                    maxProtein = nutrients["maxProtein"],
+                    minSugar = nutrients["minSugar"],
+                    maxSugar = nutrients["maxSugar"],
+                    minFat = nutrients["minFat"],
+                    maxFat = nutrients["maxFat"]
+                )
+
+                _recipe.value = response.results
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to fetch recipes."
+            } finally {
+                _loading.value = false
+            }
+        }
+    }
+
+    fun fetchRecipeByNutritionOnly(nutrients: Map<String, Int>) {
+        viewModelScope.launch {
+            _loading.value = true
+            _errorMessage.value = null
+            _recommendedRecipes.value = emptyList()
+
+            try {
+                val apiKey = KeyClient.apiService.getapikey().key
+
+                val response = SpoonacularClient.apiService.findRecipesByIngredients(
+                    apiKey = apiKey,
+                    ingredients = "",
+                    minCalories = nutrients["minCalories"],
+                    maxCalories = nutrients["maxCalories"],
+                    minProtein = nutrients["minProtein"],
+                    maxProtein = nutrients["maxProtein"],
+                    minSugar = nutrients["minSugar"],
+                    maxSugar = nutrients["maxSugar"],
+                    minFat = nutrients["minFat"],
+                    maxFat = nutrients["maxFat"]
+                )
+
+                _recommendedRecipes.value = response.results
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to fetch recipes by nutrition."
             } finally {
                 _loading.value = false
             }

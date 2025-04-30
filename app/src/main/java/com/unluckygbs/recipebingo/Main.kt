@@ -1,7 +1,6 @@
 package com.unluckygbs.recipebingo
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -17,18 +16,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.google.firebase.firestore.FirebaseFirestore
 import com.unluckygbs.recipebingo.data.database.AppDatabase
 import com.unluckygbs.recipebingo.data.repository.DailyEatsRepository
@@ -42,11 +39,10 @@ import com.unluckygbs.recipebingo.ui.screen.tracker.NutritionTrackerScreen
 import com.unluckygbs.recipebingo.ui.screen.profile.ProfileScreen
 import com.unluckygbs.recipebingo.ui.screen.auth.RegisterScreen
 import com.unluckygbs.recipebingo.ui.screen.onboarding.OnboardingScreen
+import com.unluckygbs.recipebingo.ui.screen.profile.EditProfileScreen
 import com.unluckygbs.recipebingo.ui.screen.recipe.RecipeDetailScreen
 import com.unluckygbs.recipebingo.ui.screen.recipe.SearchRecipeScreen
 import com.unluckygbs.recipebingo.ui.screen.start.StartScreen
-import com.unluckygbs.recipebingo.util.DataStoreManager
-import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModelFactory
@@ -80,7 +76,7 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
         factory = IngredientViewModelFactory(ingredientRepository)
     )
     val recipeViewModel: RecipeViewModel = viewModel(
-        factory = RecipeViewModelFactory(recipeRepository)
+        factory = RecipeViewModelFactory(recipeRepository, ingredientRepository)
     )
 
     val nutritionTrackerViewModel: NutritionTrackerViewModel = viewModel(
@@ -117,27 +113,24 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
         composable("searchingredient") {
             SearchIngredientScreen(modifier,navController,authViewModel,ingredientViewModel)
         }
-        composable("detailedrecipe/{recipeId}") { backStackEntry ->
-            val recipeId = backStackEntry.arguments?.getString("recipeId")?.toIntOrNull()
-
-
-            LaunchedEffect(recipeId) {
-                if (recipeId != null) {
-                    recipeViewModel.getRecipeById(recipeId)
-                }
-            }
-
-            val recipe by recipeViewModel.recipeById.collectAsState()
-
-
+        composable(
+            route = "detailedrecipe/{recipeId}",
+            arguments = listOf(navArgument("recipeId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getInt("recipeId") ?: 0 // Nilai default jika diperlukan
             RecipeDetailScreen(
-                recipeById = recipe,
+                recipeId = recipeId,
+                recipeViewModel = recipeViewModel,
                 onBackClick = { navController.popBackStack() },
                 nutritionTrackerViewModel = nutritionTrackerViewModel,
                 recipeViewModel = recipeViewModel,
                 context = context
             )
         }
+        composable("edit_profile") {
+            EditProfileScreen(navController = navController, authViewModel = authViewModel)
+        }
+
     })
 }
 

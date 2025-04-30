@@ -85,6 +85,12 @@ class IngredientRepository(
             .await()
     }
 
+    suspend fun getIncludeIngredientsQuery(): String {
+        return dao.getAllOnce()
+            .map { it.name.trim().lowercase().replace(" ", "%20") } // encode spasi
+            .joinToString(",") // tidak perlu `+`
+    }
+
     val allIngredients = dao.getAllIngredients()
 
     suspend fun insert(ingredient: IngredientEntity) = dao.insertIngredient(ingredient)

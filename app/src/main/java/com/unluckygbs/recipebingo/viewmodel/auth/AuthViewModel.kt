@@ -21,6 +21,10 @@ class AuthViewModel : ViewModel() {
     private val _authState = MutableLiveData<AuthState>()
     val authState : LiveData<AuthState> = _authState
 
+    val currentUser: FirebaseUser?
+        get() = auth.currentUser
+
+
     init {
         checAuthState()
     }
@@ -42,9 +46,9 @@ class AuthViewModel : ViewModel() {
             }
     }
 
-    fun register(email: String, password: String, username: String = "") {
-        if (email.isEmpty() || password.isEmpty()) {
-            _authState.value = AuthState.Error("Please insert email or password")
+    fun register(email: String, password: String, username: String) {
+        if (email.isEmpty() || password.isEmpty() || username.isEmpty()) {
+            _authState.value = AuthState.Error("Please insert all boxes")
             return
         }
 

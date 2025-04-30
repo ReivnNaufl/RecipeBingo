@@ -38,6 +38,10 @@ import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 @Composable
 fun RegisterScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
 
+    var username by remember{
+        mutableStateOf("")
+    }
+
     var email by remember{
         mutableStateOf("")
     }
@@ -70,6 +74,19 @@ fun RegisterScreen(modifier: Modifier = Modifier, navController: NavController, 
         Text(text = "Sign Up", fontSize = 32.sp)
 
         Spacer(modifier = Modifier.height(80.dp))
+
+        OutlinedTextField(
+            value = username,
+            onValueChange = {
+                username = it
+            },
+            label = {
+                Text(text = "Enter Your Username")
+            },
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextField(
             value = email,
@@ -108,7 +125,7 @@ fun RegisterScreen(modifier: Modifier = Modifier, navController: NavController, 
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(onClick = {
-            authViewModel.register(email,password)
+            authViewModel.register(email,password,username)
         },
             enabled = authState.value != AuthState.Loading,
             modifier = Modifier

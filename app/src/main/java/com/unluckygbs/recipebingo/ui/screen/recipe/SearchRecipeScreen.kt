@@ -302,8 +302,26 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                     onFilterClick = ::onFilterClick,
                     onRecommendClick = {
                         openBottomSheet.value = false
-                        Log.d("FILTER_DEBUG", "filter yang dipilih: $selectedFilters")
-                        recipeViewModel.fetchRandomRecipes()
+
+                        // Inisialisasi map filter
+                        val nutrientParams = mutableMapOf<String, Int>()
+
+                        if ("Min Calorie" in selectedFilters) nutrientParams["minCalories"] = 10
+                        if ("Max Calorie" in selectedFilters) nutrientParams["maxCalories"] = 100
+                        if ("Min Protein" in selectedFilters) nutrientParams["minProtein"] = 10
+                        if ("Max Protein" in selectedFilters) nutrientParams["maxProtein"] = 100
+                        if ("Min Sugar" in selectedFilters) nutrientParams["minSugar"] = 10
+                        if ("Max Sugar" in selectedFilters) nutrientParams["maxSugar"] = 100
+                        if ("Min Fat" in selectedFilters) nutrientParams["minFat"] = 10
+                        if ("Max Fat" in selectedFilters) nutrientParams["maxFat"] = 100
+
+                        if ("with" in selectedFilters) {
+                            recipeViewModel.fetchRecipeByAvailableIngredientswithNutrition(nutrientParams)
+                        } else if (nutrientParams.isNotEmpty()) {
+                            recipeViewModel.fetchRecipeByNutritionOnly(nutrientParams)
+                        } else {
+                            recipeViewModel.fetchRandomRecipes()
+                        }
                     }
                 )
             }
