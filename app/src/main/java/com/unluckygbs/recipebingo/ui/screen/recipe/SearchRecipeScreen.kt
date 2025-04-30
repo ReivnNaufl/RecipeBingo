@@ -1,10 +1,16 @@
 package com.unluckygbs.recipebingo.ui.screen.recipe
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +24,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -32,17 +39,21 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,6 +88,43 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
     var searchQuery by remember { mutableStateOf("") }
 
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+    val openBottomSheet = remember { mutableStateOf(false) }
+
+
+
+    val _selectedFilters = remember { mutableStateOf<Set<String>>(setOf("without")) }
+    val selectedFilters = _selectedFilters.value
+
+    val filterPairs = mapOf(
+        "Min Calorie" to "Max Calorie",
+        "Max Calorie" to "Min Calorie",
+        "Min Protein" to "Max Protein",
+        "Max Protein" to "Min Protein",
+        "Min Sugar" to "Max Sugar",
+        "Max Sugar" to "Min Sugar",
+        "Min Fat" to "Max Fat",
+        "Max Fat" to "Min Fat"
+    )
+
+    fun onFilterClick(filter: String) {
+        val current = _selectedFilters.value.toMutableSet()
+        if (filter == "with" || filter == "without") {
+            current.remove("with")
+            current.remove("without")
+            current.add(filter)
+        } else {
+            if (current.contains(filter)) {
+                current.remove(filter)
+            } else {
+                filterPairs[filter]?.let { pair -> current.remove(pair) }
+                current.add(filter)
+            }
+        }
+        _selectedFilters.value = current
+    }
 
     LaunchedEffect(authState.value) {
         when(authState.value){
@@ -179,7 +227,7 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                 Text("Or get a recommendation 👇", color = Color.Gray)
                 if (recommended.isEmpty()) {
                     RecommendationButton(onClick = {
-                        recipeViewModel.fetchRandomRecipes()
+                        openBottomSheet.value = true
                     })
                 }
 
@@ -200,7 +248,7 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
 
                         item(span = { GridItemSpan(3) }) {
                             Button(
-                                onClick = { recipeViewModel.fetchRandomRecipes() },
+                                onClick = { openBottomSheet.value = true },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00D45B)),
                                 shape = RoundedCornerShape(50),
                                 modifier = Modifier
@@ -238,10 +286,26 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
 
                     Text("Or get a recommendation 👇", color = Color.Gray)
                     RecommendationButton(
-                        onClick = { recipeViewModel.fetchRandomRecipes() },
+                        onClick = { openBottomSheet.value = true },
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                 }
+            }
+        }
+        if (openBottomSheet.value){
+            ModalBottomSheet(
+                onDismissRequest = { openBottomSheet.value = false },
+                sheetState = sheetState
+            ){
+                RecipeRecommendationBottomSheet(
+                    selectedFilters = selectedFilters,
+                    onFilterClick = ::onFilterClick,
+                    onRecommendClick = {
+                        openBottomSheet.value = false
+                        Log.d("FILTER_DEBUG", "filter yang dipilih: $selectedFilters")
+                        recipeViewModel.fetchRandomRecipes()
+                    }
+                )
             }
         }
     }
@@ -296,3 +360,126 @@ fun RecommendationButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun RecipeRecommendationBottomSheet(
+    selectedFilters: Set<String>,
+    onFilterClick: (String) -> Unit,
+    onRecommendClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Drag Handle
+        Box(
+            modifier = Modifier
+                .width(40.dp)
+                .height(4.dp)
+                .padding(bottom = 8.dp)
+                .background(Color.LightGray, shape = RoundedCornerShape(2.dp))
+        )
+
+        Text(
+            text = "Recipe Recommendation",
+            style = MaterialTheme.typography.titleMedium,
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Based on available ingredients
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Row(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val isWithSelected = selectedFilters.contains("with")
+                FilterChip(
+                    text = "Based on available Ingredients",
+                    selected = isWithSelected,
+                    onClick = {
+                        onFilterClick(if (isWithSelected) "without" else "with")
+                    }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Min Filters
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf("Min Calorie", "Min Protein", "Min Sugar", "Min Fat").forEach { filter ->
+                FilterChip(
+                    text = filter,
+                    selected = selectedFilters.contains(filter),
+                    onClick = { onFilterClick(filter) }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Max Filters
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf("Max Calorie", "Max Protein", "Max Sugar", "Max Fat").forEach { filter ->
+                FilterChip(
+                    text = filter,
+                    selected = selectedFilters.contains(filter),
+                    onClick = { onFilterClick(filter) }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Button: Recommend me a recipe
+        Button(
+            onClick = onRecommendClick,
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C853)),
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .height(50.dp)
+        ) {
+            Text(text = "Recommend me a recipe", color = Color.White, fontSize = 16.sp)
+        }
+    }
+}
+
+
+@Composable
+fun FilterChip(text: String, selected: Boolean, onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        colors = if (selected) {
+            ButtonDefaults.outlinedButtonColors(
+                containerColor = Color(0xFF00C853),
+                contentColor = Color.White
+            )
+        } else {
+            ButtonDefaults.outlinedButtonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color.Black
+            )
+        },
+        border = ButtonDefaults.outlinedButtonBorder,
+        modifier = Modifier.height(36.dp)
+    ) {
+        Text(text = text, fontSize = 12.sp)
+    }
+}

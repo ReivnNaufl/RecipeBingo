@@ -34,6 +34,9 @@ fun RecipeDetailScreen(
     onEatClick: () -> Unit = {},
     recipeById: RecipeById?
 ) {
+    val nutrients = recipeById?.nutrition?.nutrient
+        ?.map { "${it.name}: ${it.amount} ${it.unit}" }
+
     if (recipeById == null) {
         // Tampilkan indikator loading atau teks error
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -110,11 +113,19 @@ fun RecipeDetailScreen(
             item { Divider() }
 
             // Steps section
-            item {
-                SectionWithDots(title = "Steps", items = List(4) { "lorem ipsum" })
+            recipeById.analyzedInstruction.flatMap { it.steps }.map { it.step }.let { steps ->
+                item {
+                    SectionWithDots(title = "Steps", items = steps)
+                }
             }
 
             item { Divider() }
+
+            nutrients?.let {
+                item {
+                        SectionWithDots(title = "Nutrition", items = it)
+                }
+            }
         }
 
         // Bottom buttons tetap di bawah layar
