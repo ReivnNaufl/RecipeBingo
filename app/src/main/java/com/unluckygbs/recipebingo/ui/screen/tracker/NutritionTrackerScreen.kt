@@ -35,10 +35,10 @@ fun NutritionTrackerScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     authViewModel: AuthViewModel,
+    nutritionTrackerViewModel: NutritionTrackerViewModel
 ) {
     val authState = authViewModel.authState.observeAsState()
     val context = LocalContext.current
-    val nutritionTrackerViewModel: NutritionTrackerViewModel = viewModel()
 
     LaunchedEffect(authState.value) {
         when (authState.value) {
@@ -73,16 +73,13 @@ fun NutritionTracker(
     } ?: LocalDate.now()
 
     LaunchedEffect(selectedDate) {
-        nutritionTrackerViewModel.loadFoodsForDate(selectedDate)
+        nutritionTrackerViewModel.loadDailyEats(selectedDate)
     }
+    val dailyEats by nutritionTrackerViewModel.dailyEats
+    val totalNutrition by nutritionTrackerViewModel.totalNutrition
+    val calorie = totalNutrition?.find { it.name == "Calories" }
+    val totalCalories = calorie?.amount?.toFloat() ?: 0
 
-    val foods = nutritionTrackerViewModel.consumedFoods
-    val totalCalories = foods.sumOf { it.calories }
-    val totalCarbs = foods.sumOf { it.carbohydrates }
-    val totalProtein = foods.sumOf { it.protein }
-    val totalFat = foods.sumOf { it.fat }
-    val totalSugar = foods.sumOf { it.sugar }
-    val totalFiber = foods.sumOf { it.fiber }
 
     Column(
         modifier = Modifier
@@ -109,10 +106,12 @@ fun NutritionTracker(
         Text("Consumed Foods on ${selectedDate}", fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (foods.isEmpty()) {
+        val eatenRecipe = dailyEats?.recipes
+
+        if (eatenRecipe.isNullOrEmpty()) {
             Text("No foods logged.")
         } else {
-            foods.forEach { food ->
+            eatenRecipe.forEach() { food ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -120,8 +119,7 @@ fun NutritionTracker(
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFEFEFEF))
                 ) {
                     Column(modifier = Modifier.padding(8.dp)) {
-                        Text(food.name, fontWeight = FontWeight.Bold)
-                        Text("Carbs: ${food.carbohydrates}g, Protein: ${food.protein}g, Fat: ${food.fat}g")
+                        Text(food.title, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -134,7 +132,7 @@ fun NutritionTracker(
 
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
             CircularProgressIndicator(
-                progress = (totalCalories / 2400f).coerceIn(0f, 1f),
+                progress = (totalCalories.toFloat() / 2400f).coerceIn(0f, 1f),
                 modifier = Modifier.size(120.dp),
                 color = Color.Green,
                 strokeWidth = 8.dp
@@ -145,11 +143,16 @@ fun NutritionTracker(
         Spacer(modifier = Modifier.height(12.dp))
 
         Column {
-            Text("$totalCarbs gr of Carbohydrates")
-            Text("$totalProtein gr of Proteins")
-            Text("$totalFat gr of Fats")
-            Text("$totalSugar gr of Sugar")
-            Text("$totalFiber gr of Fibers")
+            val nutrients = totalNutrition
+            if (nutrients == null) {
+                Text("No recipe eaten today")
+            } else {
+                nutrients.forEach { nutrient ->
+                    if (nutrient.name != "Calories") {
+                        Text("${nutrient.amount} ${nutrient.unit} of ${nutrient.name}")
+                    }
+                }
+            }
         }
     }
 }

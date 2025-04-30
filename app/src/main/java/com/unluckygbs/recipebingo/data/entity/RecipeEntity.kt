@@ -14,7 +14,7 @@ data class RecipeEntity(
     val title: String,
     val image: String,
     val isBookmarked: Boolean = false,
-    val nutrition: List<Nutrient>,
+    var nutrition: List<Nutrient>,
     val extendedIngredient: List<RecipeIngredient>,
     val analyzedInstruction: List<AnalyzedInstruction>
 )

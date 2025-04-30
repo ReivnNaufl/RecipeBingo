@@ -7,11 +7,22 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.unluckygbs.recipebingo.data.entity.DailyRecipeCrossRef
 import com.unluckygbs.recipebingo.data.entity.IngredientEntity
+import com.unluckygbs.recipebingo.data.entity.RecipeEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RecipeDao {
+    @Query("SELECT * FROM recipe")
+    fun getAll(): Flow<List<RecipeEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRecipe(recipeEntity: RecipeEntity)
+
+    @Query("SELECT EXISTS(SELECT 1 FROM recipe WHERE id = :id LIMIT 1)")
+    suspend fun isRecipeExist(id: Int): Boolean
+
     @Query("DELETE FROM recipe")
     suspend fun clearAll()
 }

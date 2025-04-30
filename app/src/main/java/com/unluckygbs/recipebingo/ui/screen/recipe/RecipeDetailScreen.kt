@@ -1,5 +1,8 @@
 package com.unluckygbs.recipebingo.ui.screen.recipe
 
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,17 +29,28 @@ import coil.compose.AsyncImage
 import com.unluckygbs.recipebingo.R
 import com.unluckygbs.recipebingo.data.dataclass.RecipeById
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
+import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
+import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModel
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 
 @Composable
 fun RecipeDetailScreen(
     onBackClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
-    onEatClick: () -> Unit = {},
-    recipeById: RecipeById?
+    recipeById: RecipeById?,
+    nutritionTrackerViewModel: NutritionTrackerViewModel,
+    recipeViewModel: RecipeViewModel,
+    context: Context
 ) {
     val nutrients = recipeById?.nutrition?.nutrient
         ?.map { "${it.name}: ${it.amount} ${it.unit}" }
+
+
+    Log.d("NUTRITION", "Nutrition: ${recipeById?.nutrition?.nutrient}")
 
     if (recipeById == null) {
         // Tampilkan indikator loading atau teks error
@@ -142,21 +157,57 @@ fun RecipeDetailScreen(
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Bookmark")
             }
+            var showDialog by remember { mutableStateOf(false) }
+
+            if (showDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDialog = false },
+                    title = { Text("Confirm Add") },
+                    text = { Text("Add this recipe to today's nutrition log?") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showDialog = false
+                            val insertedData = RecipeEntity(
+                                id = recipeById.id,
+                                title = recipeById.title,
+                                image = recipeById.image,
+                                isBookmarked = false,
+                                nutrition = recipeById.nutrition.nutrient,
+                                extendedIngredient = recipeById.extendedIngredients,
+                                analyzedInstruction = recipeById.analyzedInstruction
+                            )
+                            recipeViewModel.insertSingleRecipe(insertedData)
+                            nutritionTrackerViewModel.insertRecipe(insertedData)
+
+                            Toast.makeText(context, "Recipe added!", Toast.LENGTH_SHORT).show()
+                        }) {
+                            Text("Add")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDialog = false }) {
+                            Text("Cancel")
+                        }
+                    }
+                )
+            }
+
             FloatingActionButton(
-                onClick = onEatClick,
+                onClick = { showDialog = true },
                 backgroundColor = Color(0xFF00C853),
-                shape = RoundedCornerShape(50)
+                shape = RoundedCornerShape(50),
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically, // Vertikal centering untuk ikon dan teks
-                    horizontalArrangement = Arrangement.Center, // Menjaga jarak antar elemen
-                    modifier = Modifier.padding(horizontal = 8.dp) // Menambahkan sedikit padding agar teks tidak terlalu rapat
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(horizontal = 8.dp)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp)) // Memberikan ruang antara ikon dan teks
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text("Eat")
                 }
             }
+
 
         }
     }

@@ -31,6 +31,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.firestore.FirebaseFirestore
 import com.unluckygbs.recipebingo.data.database.AppDatabase
+import com.unluckygbs.recipebingo.data.repository.DailyEatsRepository
+import com.unluckygbs.recipebingo.data.repository.RecipeRepository
 import com.unluckygbs.recipebingo.repository.IngredientRepository
 import com.unluckygbs.recipebingo.ui.screen.ingredient.SearchIngredientScreen
 import com.unluckygbs.recipebingo.ui.screen.home.HomeScreen
@@ -50,17 +52,40 @@ import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModelFactory
 import com.unluckygbs.recipebingo.viewmodel.main.MainViewModel
 import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
+import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModelFactory
+import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModel
+import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModelFactory
 
 @Composable
 fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Context, startDestination: String, onOnboardingFinished: () -> Unit) {
     val firestore = FirebaseFirestore.getInstance()
-    val ingredientRepository = IngredientRepository(AppDatabase.getDatabase(context).ingredientDao(), firestore = firestore, userId = authViewModel.getCurrentUserUid() ?: "")
+    val ingredientRepository = IngredientRepository(
+        AppDatabase.getDatabase(context).ingredientDao(),
+        firestore = firestore,
+        userId = authViewModel.getCurrentUserUid() ?: ""
+    )
+    val dailyEatsRepository = DailyEatsRepository(
+        dao = AppDatabase.getDatabase(context).dailyEatsDao(),
+        firestore = firestore,
+        userId = authViewModel.getCurrentUserUid() ?: ""
+    )
+    val recipeRepository = RecipeRepository(
+        dao = AppDatabase.getDatabase(context).recipeDao(),
+        firestore = firestore,
+        userId = authViewModel.getCurrentUserUid() ?: ""
+    )
 
     val navController = rememberNavController()
     val ingredientViewModel: IngredientViewModel = viewModel(
         factory = IngredientViewModelFactory(ingredientRepository)
     )
-    val recipeViewModel: RecipeViewModel = viewModel()
+    val recipeViewModel: RecipeViewModel = viewModel(
+        factory = RecipeViewModelFactory(recipeRepository)
+    )
+
+    val nutritionTrackerViewModel: NutritionTrackerViewModel = viewModel(
+        factory = NutritionTrackerViewModelFactory(dailyEatsRepository)
+    )
 
     val authState by authViewModel.authState.observeAsState()
 
@@ -87,7 +112,7 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
             RegisterScreen(modifier,navController,authViewModel)
         }
         composable("home"){
-            App(modifier,navController,authViewModel,ingredientViewModel, recipeViewModel)
+            App(modifier,navController,authViewModel,ingredientViewModel, recipeViewModel, nutritionTrackerViewModel = nutritionTrackerViewModel)
         }
         composable("searchingredient") {
             SearchIngredientScreen(modifier,navController,authViewModel,ingredientViewModel)
@@ -107,7 +132,10 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
 
             RecipeDetailScreen(
                 recipeById = recipe,
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                nutritionTrackerViewModel = nutritionTrackerViewModel,
+                recipeViewModel = recipeViewModel,
+                context = context
             )
         }
     })
@@ -120,7 +148,8 @@ fun App(
     authViewModel: AuthViewModel,
     ingredientViewModel: IngredientViewModel,
     recipeViewModel: RecipeViewModel,
-    mainViewModel: MainViewModel = viewModel()
+    mainViewModel: MainViewModel = viewModel(),
+    nutritionTrackerViewModel: NutritionTrackerViewModel
 ) {
 
     val navItemList = listOf(
@@ -144,7 +173,7 @@ fun App(
                         onClick = { mainViewModel.setSelectedIndex(index) },
                         icon = {
                             Icon(imageVector = navItem.icon, "icon")
-                               },
+                        },
                         label = {
                             Text(text = navItem.label)
                         }
@@ -153,18 +182,18 @@ fun App(
                 }
             }
         }
-        ) { innerPadding ->
-        ContentScreen(modifier = Modifier.padding(innerPadding), navController = navController, authViewModel = authViewModel,selectedIndex, ingredientViewModel = ingredientViewModel, recipeViewModel = recipeViewModel)
+    ) { innerPadding ->
+        ContentScreen(modifier = Modifier.padding(innerPadding), navController = navController, authViewModel = authViewModel,selectedIndex, ingredientViewModel = ingredientViewModel, recipeViewModel = recipeViewModel, nutritionTrackerViewModel = nutritionTrackerViewModel)
     }
 }
 
 @Composable
-fun ContentScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, selectedIndex : Int,ingredientViewModel: IngredientViewModel, recipeViewModel: RecipeViewModel) {
+fun ContentScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, selectedIndex : Int,ingredientViewModel: IngredientViewModel, recipeViewModel: RecipeViewModel, nutritionTrackerViewModel: NutritionTrackerViewModel) {
     when(selectedIndex){
         0 -> HomeScreen(modifier,navController,authViewModel)
         1 -> SearchRecipeScreen(modifier,navController,authViewModel,recipeViewModel)
         2 -> IngredientScreen(modifier,navController,authViewModel,ingredientViewModel)
-        3 -> NutritionTrackerScreen(modifier,navController,authViewModel)
+        3 -> NutritionTrackerScreen(modifier,navController,authViewModel,nutritionTrackerViewModel)
         4 -> ProfileScreen(modifier,navController,authViewModel)
     }
 }
