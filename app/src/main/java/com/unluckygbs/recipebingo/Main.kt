@@ -50,6 +50,7 @@ import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModelFactory
 import com.unluckygbs.recipebingo.viewmodel.main.MainViewModel
 import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
+import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModelFactory
 
 @Composable
 fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Context, startDestination: String, onOnboardingFinished: () -> Unit) {
@@ -60,7 +61,9 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
     val ingredientViewModel: IngredientViewModel = viewModel(
         factory = IngredientViewModelFactory(ingredientRepository)
     )
-    val recipeViewModel: RecipeViewModel = viewModel()
+    val recipeViewModel: RecipeViewModel = viewModel(
+        factory = RecipeViewModelFactory(ingredientRepository)
+    )
 
     val authState by authViewModel.authState.observeAsState()
 
