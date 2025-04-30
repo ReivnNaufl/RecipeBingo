@@ -42,6 +42,7 @@ import com.unluckygbs.recipebingo.ui.screen.tracker.NutritionTrackerScreen
 import com.unluckygbs.recipebingo.ui.screen.profile.ProfileScreen
 import com.unluckygbs.recipebingo.ui.screen.auth.RegisterScreen
 import com.unluckygbs.recipebingo.ui.screen.onboarding.OnboardingScreen
+import com.unluckygbs.recipebingo.ui.screen.profile.EditProfileScreen
 import com.unluckygbs.recipebingo.ui.screen.recipe.RecipeDetailScreen
 import com.unluckygbs.recipebingo.ui.screen.recipe.SearchRecipeScreen
 import com.unluckygbs.recipebingo.ui.screen.start.StartScreen
@@ -106,6 +107,9 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
                 recipeId = recipeId,
                 viewModel = recipeViewModel
             )
+        }
+        composable("edit_profile") {
+            EditProfileScreen(navController = navController, authViewModel = authViewModel)
         }
 
     })
