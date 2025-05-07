@@ -187,9 +187,9 @@ class RecipeViewModel(
         }
     }
 
-    fun updateOrInsertRecipe(recipeEntity: RecipeEntity, keepBookmark: Boolean) {
+    fun updateOrInsertRecipe(recipeEntity: RecipeEntity, changeBookmark: Boolean) {
         viewModelScope.launch {
-            recipeRepository.updateOrInsertRecipe(recipeEntity, keepBookmark)
+            recipeRepository.updateOrInsertRecipe(recipeEntity, changeBookmark)
         }
     }
 

@@ -189,7 +189,7 @@ fun RecipeDetailScreenContent(
                         extendedIngredient = recipeById.extendedIngredient,
                         analyzedInstruction = recipeById.analyzedInstruction
                     )
-                    recipeViewModel.updateOrInsertRecipe(insertedData, keepBookmark = false)
+                    recipeViewModel.updateOrInsertRecipe(insertedData, changeBookmark = true)
                 },
                 isBookmarked = recipeById.isBookmarked
             )
@@ -213,7 +213,7 @@ fun RecipeDetailScreenContent(
                                 extendedIngredient = recipeById.extendedIngredient,
                                 analyzedInstruction = recipeById.analyzedInstruction
                             )
-                            recipeViewModel.updateOrInsertRecipe(insertedData, keepBookmark = true)
+                            recipeViewModel.updateOrInsertRecipe(insertedData, changeBookmark = false)
                             nutritionTrackerViewModel.insertRecipe(insertedData)
 
                             Toast.makeText(context, "Recipe added!", Toast.LENGTH_SHORT).show()
