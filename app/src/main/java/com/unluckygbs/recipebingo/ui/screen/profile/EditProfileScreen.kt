@@ -143,8 +143,9 @@ fun EditProfileScreen(navController: NavController, authViewModel: AuthViewModel
                                 Image(
                                     bitmap = imageBitmap,
                                     contentDescription = "Profile Picture",
+                                    contentScale = ContentScale.Crop,
                                     modifier = Modifier
-                                        .size(72.dp)
+                                        .fillMaxSize()
                                         .clip(CircleShape)
                                 )
                             }
