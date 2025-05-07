@@ -13,10 +13,20 @@ class RecipeRepository(
     private val userId: String
 ) {
 
-    suspend fun getLocalDailyEats(): Flow<List<RecipeEntity>> = dao.getAll()
+    fun getAllRecipe(): Flow<List<RecipeEntity>> = dao.getAll()
 
     suspend fun insertSingleRecipe(recipeEntity: RecipeEntity) {
         dao.insertRecipe(recipeEntity)
+    }
+
+    suspend fun updateOrInsertRecipe(recipeEntity: RecipeEntity, changeBookmark: Boolean) {
+        if (dao.isRecipeExist(recipeEntity.id)) {
+            if (changeBookmark){
+                dao.updateBookmark(recipeEntity.id, recipeEntity.isBookmarked)
+            }
+        } else {
+            dao.insertRecipe(recipeEntity)
+        }
     }
 
     suspend fun deleteAll(){
@@ -25,5 +35,9 @@ class RecipeRepository(
 
     suspend fun isRecipeExist(id: Int): Boolean{
         return dao.isRecipeExist(id)
+    }
+
+    suspend fun getRecipeById(id: Int): RecipeEntity {
+        return dao.getRecipeById(id)
     }
 }

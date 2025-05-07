@@ -81,6 +81,18 @@ data class RecipeById(
     @SerializedName("analyzedInstructions") val analyzedInstruction: List<AnalyzedInstruction>
 )
 
+fun RecipeById.toRecipeEntity(isBookmarked: Boolean): RecipeEntity {
+    return RecipeEntity(
+        id = this.id,
+        title = this.title,
+        image = this.image,
+        extendedIngredient = this.extendedIngredients,
+        nutrition = this.nutrition.nutrient,
+        analyzedInstruction = this.analyzedInstruction,
+        isBookmarked = isBookmarked
+    )
+}
+
 data class Nutrition(
     @SerializedName("nutrients") val nutrient: List<Nutrient>
 )

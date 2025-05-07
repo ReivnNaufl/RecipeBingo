@@ -47,7 +47,11 @@ fun RecipeDetailScreen(
     val recipeById by recipeViewModel.recipeById.collectAsState()
 
     LaunchedEffect(recipeId) {
-        recipeViewModel.getRecipeById(recipeId) // Ambil data untuk ID baru
+        if (recipeViewModel.isRecipeExist(recipeId)){
+            recipeViewModel.getRecipeByIdLocal(recipeId)
+        } else {
+            recipeViewModel.getRecipeById(recipeId)
+        }
     }
 
     RecipeDetailScreenContent(
@@ -64,16 +68,16 @@ fun RecipeDetailScreen(
 fun RecipeDetailScreenContent(
     onBackClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
-    recipeById: RecipeById?,
+    recipeById: RecipeEntity?,
     nutritionTrackerViewModel: NutritionTrackerViewModel,
     recipeViewModel: RecipeViewModel,
     context: Context
 ) {
-    val nutrients = recipeById?.nutrition?.nutrient
+    val nutrients = recipeById?.nutrition
         ?.map { "${it.name}: ${it.amount} ${it.unit}" }
 
 
-    Log.d("NUTRITION", "Nutrition: ${recipeById?.nutrition?.nutrient}")
+    Log.d("NUTRITION", "Nutrition: ${recipeById?.nutrition}")
 
     if (recipeById == null) {
         // Tampilkan indikator loading atau teks error
@@ -145,7 +149,7 @@ fun RecipeDetailScreenContent(
 
             // Ingredients section
             item {
-                SectionWithDots(title = "Ingredients", items = recipeById.extendedIngredients.map { it.original })
+                SectionWithDots(title = "Ingredients", items = recipeById.extendedIngredient.map { it.original })
             }
 
             item { Divider() }
@@ -174,13 +178,21 @@ fun RecipeDetailScreenContent(
                 .align(Alignment.BottomCenter),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            BookmarkButton(onSaveClick = { isBookmarked ->
-                if (isBookmarked) {
-                    // simpan ke bookmark
-                } else {
-                    // hapus dari bookmark
-                }
-            })
+            BookmarkButton(
+                onSaveClick = {
+                    val insertedData = RecipeEntity(
+                        id = recipeById.id,
+                        title = recipeById.title,
+                        image = recipeById.image,
+                        isBookmarked = !recipeById.isBookmarked,
+                        nutrition = recipeById.nutrition,
+                        extendedIngredient = recipeById.extendedIngredient,
+                        analyzedInstruction = recipeById.analyzedInstruction
+                    )
+                    recipeViewModel.updateOrInsertRecipe(insertedData, keepBookmark = false)
+                },
+                isBookmarked = recipeById.isBookmarked
+            )
 
             var showDialog by remember { mutableStateOf(false) }
 
@@ -197,11 +209,11 @@ fun RecipeDetailScreenContent(
                                 title = recipeById.title,
                                 image = recipeById.image,
                                 isBookmarked = false,
-                                nutrition = recipeById.nutrition.nutrient,
-                                extendedIngredient = recipeById.extendedIngredients,
+                                nutrition = recipeById.nutrition,
+                                extendedIngredient = recipeById.extendedIngredient,
                                 analyzedInstruction = recipeById.analyzedInstruction
                             )
-                            recipeViewModel.insertSingleRecipe(insertedData)
+                            recipeViewModel.updateOrInsertRecipe(insertedData, keepBookmark = true)
                             nutritionTrackerViewModel.insertRecipe(insertedData)
 
                             Toast.makeText(context, "Recipe added!", Toast.LENGTH_SHORT).show()
@@ -241,21 +253,18 @@ fun RecipeDetailScreenContent(
 @Composable
 fun BookmarkButton(
     modifier: Modifier = Modifier,
-    initialBookmarked: Boolean = false,
+    isBookmarked: Boolean,
     onSaveClick: (Boolean) -> Unit
 ) {
-    var isBookmarked by remember { mutableStateOf(initialBookmarked) }
-
     FloatingActionButton(
         onClick = {
-            isBookmarked = !isBookmarked
             onSaveClick(isBookmarked)
         },
         backgroundColor = Color(0xFF00C853),
         modifier = modifier
     ) {
         Icon(
-            imageVector = if (isBookmarked) Icons.Outlined.Star else Icons.Filled.Star,
+            imageVector = if (!isBookmarked) Icons.Outlined.Star else Icons.Filled.Star,
             contentDescription = if (isBookmarked) "Remove Bookmark" else "Add Bookmark"
         )
     }

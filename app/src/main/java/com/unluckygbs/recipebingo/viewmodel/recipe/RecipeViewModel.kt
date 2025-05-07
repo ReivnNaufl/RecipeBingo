@@ -5,10 +5,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.unluckygbs.recipebingo.data.client.KeyClient
 import com.unluckygbs.recipebingo.data.client.SpoonacularClient
 import com.unluckygbs.recipebingo.data.dataclass.Recipe
 import com.unluckygbs.recipebingo.data.dataclass.RecipeById
+import com.unluckygbs.recipebingo.data.dataclass.toRecipeEntity
 import com.unluckygbs.recipebingo.data.entity.IngredientEntity
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
 import com.unluckygbs.recipebingo.data.repository.RecipeRepository
@@ -25,8 +27,8 @@ class RecipeViewModel(
     private val _recipe = MutableLiveData<List<Recipe>>(emptyList())
     val recipe: LiveData<List<Recipe>> = _recipe
 
-    private val _recipebyid = MutableStateFlow<RecipeById?>(null)
-    val recipeById: StateFlow<RecipeById?> = _recipebyid
+    private val _recipebyid = MutableStateFlow<RecipeEntity?>(null)
+    val recipeById: StateFlow<RecipeEntity?> = _recipebyid
 
     private val _loading = MutableLiveData(false)
     val loading: LiveData<Boolean> = _loading
@@ -97,7 +99,7 @@ class RecipeViewModel(
                 )
                 Log.d("DetailRecipeDebug", "API response: $response")
 
-                _recipebyid.value = response
+                _recipebyid.value = response.toRecipeEntity(false)
             } catch (e: Exception) {
                 Log.e("DetailRecipeDebug", "Error: ${e.localizedMessage}")
                 _errorMessage.value = "No Connection."
@@ -185,5 +187,17 @@ class RecipeViewModel(
         }
     }
 
+    fun updateOrInsertRecipe(recipeEntity: RecipeEntity, keepBookmark: Boolean) {
+        viewModelScope.launch {
+            recipeRepository.updateOrInsertRecipe(recipeEntity, keepBookmark)
+        }
+    }
 
+    suspend fun isRecipeExist(id: Int): Boolean {
+        return recipeRepository.isRecipeExist(id)
+    }
+
+    suspend fun getRecipeByIdLocal(id: Int){
+        _recipebyid.value = recipeRepository.getRecipeById(id)
+    }
 }

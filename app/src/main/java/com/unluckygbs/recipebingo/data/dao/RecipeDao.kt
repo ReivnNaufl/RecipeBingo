@@ -23,6 +23,12 @@ interface RecipeDao {
     @Query("SELECT EXISTS(SELECT 1 FROM recipe WHERE id = :id LIMIT 1)")
     suspend fun isRecipeExist(id: Int): Boolean
 
+    @Query("UPDATE recipe SET isBookmarked = :isBookmarked WHERE id = :id")
+    suspend fun updateBookmark(id: Int, isBookmarked: Boolean)
+
+    @Query("SELECT * FROM recipe WHERE id = :id")
+    suspend fun getRecipeById(id: Int): RecipeEntity
+
     @Query("DELETE FROM recipe")
     suspend fun clearAll()
 }
