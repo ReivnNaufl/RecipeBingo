@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -133,6 +134,7 @@ fun ProfileContent(
                         Image(
                             painter = BitmapPainter(imageBitmap),
                             contentDescription = "Profile Picture",
+                            contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .size(72.dp)
                                 .clip(CircleShape)

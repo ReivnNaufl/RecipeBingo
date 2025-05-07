@@ -9,6 +9,7 @@ import com.unluckygbs.recipebingo.data.client.KeyClient
 import com.unluckygbs.recipebingo.data.client.SpoonacularClient
 import com.unluckygbs.recipebingo.data.dataclass.Recipe
 import com.unluckygbs.recipebingo.data.dataclass.RecipeById
+import com.unluckygbs.recipebingo.data.entity.IngredientEntity
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
 import com.unluckygbs.recipebingo.data.repository.RecipeRepository
 import com.unluckygbs.recipebingo.repository.IngredientRepository
@@ -168,6 +169,8 @@ class RecipeViewModel(
             }
         }
     }
+
+    val allBookmarked: List<RecipeById> = emptyList()
 
     fun resetState() {
         _recipe.value = emptyList()

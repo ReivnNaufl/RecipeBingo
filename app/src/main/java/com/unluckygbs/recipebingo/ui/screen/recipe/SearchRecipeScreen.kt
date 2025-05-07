@@ -148,7 +148,7 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* Bookmark */ }) {
+                    IconButton(onClick = { navController.navigate("bookmarkedrecipe") }) {
                         Icon(Icons.Default.ArrowDropDown, contentDescription = "Bookmark")
                     }
                 }
