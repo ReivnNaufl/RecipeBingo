@@ -12,14 +12,19 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.unluckygbs.recipebingo.data.dataclass.UserProfile
 import com.unluckygbs.recipebingo.data.entity.UserEntity
 
 class AuthViewModel : ViewModel() {
+
     private val auth : FirebaseAuth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
 
     private val _authState = MutableLiveData<AuthState>()
     val authState : LiveData<AuthState> = _authState
+
+    private val _userProfile = MutableLiveData<UserProfile?>()
+    val userProfile: LiveData<UserProfile?> = _userProfile
 
     val currentUser: FirebaseUser?
         get() = auth.currentUser
@@ -141,6 +146,32 @@ class AuthViewModel : ViewModel() {
         } else {
             _authState.value = AuthState.Authenticated
         }
+    }
+
+    fun loadUserProfile() {
+        val userId = auth.currentUser?.uid ?: return
+        firestore.collection("users")
+            .document(userId)
+            .get()
+            .addOnSuccessListener { doc ->
+                val username = doc.getString("username") ?: "No Name"
+                val email = doc.getString("email") ?: "No Email"
+                val photo = doc.getString("profileImageBase64")?.takeIf { it.isNotBlank() && it != "null" }
+                _userProfile.value = UserProfile(username, email, photo)
+            }
+            .addOnFailureListener {
+                _userProfile.value = null
+            }
+    }
+
+    fun updateProfileImageBase64(base64String: String, onSuccess: () -> Unit = {}, onError: (String) -> Unit = {}) {
+        val uid = auth.currentUser?.uid ?: return
+
+        firestore.collection("users")
+            .document(uid)
+            .update("profileImageBase64", base64String)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onError(it.message ?: "Unknown error") }
     }
 
 }

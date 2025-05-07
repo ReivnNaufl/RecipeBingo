@@ -1,5 +1,6 @@
 package com.unluckygbs.recipebingo.ui.screen.profile
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -49,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.firestore.FirebaseFirestore
+import com.unluckygbs.recipebingo.util.base64ToImageBitmap
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 
@@ -65,6 +68,7 @@ fun ProfileScreen(
     var displayName by remember { mutableStateOf("Loading...") }
     var email by remember { mutableStateOf("No Email") }
     var photoUrl by remember { mutableStateOf<String?>(null) }
+
     LaunchedEffect(userId) {
         userId?.let {
             FirebaseFirestore.getInstance()
@@ -125,15 +129,15 @@ fun ProfileContent(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (photoUrl != null) {
-                        AsyncImage(
-                            model = photoUrl,
+                    base64ToImageBitmap(photoUrl)?.let { imageBitmap ->
+                        Image(
+                            painter = BitmapPainter(imageBitmap),
                             contentDescription = "Profile Picture",
                             modifier = Modifier
                                 .size(72.dp)
                                 .clip(CircleShape)
                         )
-                    } else {
+                    } ?: run {
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Default Profile Icon",
