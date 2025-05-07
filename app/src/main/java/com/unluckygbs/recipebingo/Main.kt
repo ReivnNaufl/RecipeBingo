@@ -186,7 +186,7 @@ fun App(
 @Composable
 fun ContentScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, selectedIndex : Int,ingredientViewModel: IngredientViewModel, recipeViewModel: RecipeViewModel, nutritionTrackerViewModel: NutritionTrackerViewModel) {
     when(selectedIndex){
-        0 -> HomeScreen(modifier,navController,authViewModel)
+        0 -> HomeScreen(modifier,navController,authViewModel,recipeViewModel,nutritionTrackerViewModel,ingredientViewModel)
         1 -> SearchRecipeScreen(modifier,navController,authViewModel,recipeViewModel)
         2 -> IngredientScreen(modifier,navController,authViewModel,ingredientViewModel)
         3 -> NutritionTrackerScreen(modifier,navController,authViewModel,nutritionTrackerViewModel)
