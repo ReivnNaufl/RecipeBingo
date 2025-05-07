@@ -1,6 +1,8 @@
 package com.unluckygbs.recipebingo.data.dataclass
 
 import android.icu.text.CaseMap.Title
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 import com.unluckygbs.recipebingo.data.entity.IngredientEntity
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
@@ -80,7 +82,7 @@ data class RecipeById(
 )
 
 data class Nutrition(
-    @SerializedName("nutrient") val nutrient: List<Nutrient>
+    @SerializedName("nutrients") val nutrient: List<Nutrient>
 )
 
 data class Nutrient(

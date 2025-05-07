@@ -9,12 +9,17 @@ import com.unluckygbs.recipebingo.data.client.KeyClient
 import com.unluckygbs.recipebingo.data.client.SpoonacularClient
 import com.unluckygbs.recipebingo.data.dataclass.Recipe
 import com.unluckygbs.recipebingo.data.dataclass.RecipeById
+import com.unluckygbs.recipebingo.data.entity.RecipeEntity
+import com.unluckygbs.recipebingo.data.repository.RecipeRepository
 import com.unluckygbs.recipebingo.repository.IngredientRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class RecipeViewModel(private val ingredientRepository: IngredientRepository): ViewModel() {
+class RecipeViewModel(
+    private val recipeRepository: RecipeRepository,
+    private val ingredientRepository: IngredientRepository
+) : ViewModel() {
 
     private val _recipe = MutableLiveData<List<Recipe>>(emptyList())
     val recipe: LiveData<List<Recipe>> = _recipe
@@ -170,4 +175,12 @@ class RecipeViewModel(private val ingredientRepository: IngredientRepository): V
         _errorMessage.value = null
         _loading.value = false
     }
+
+    fun insertSingleRecipe(recipeEntity: RecipeEntity) {
+        viewModelScope.launch {
+            recipeRepository.insertSingleRecipe(recipeEntity)
+        }
+    }
+
+
 }
