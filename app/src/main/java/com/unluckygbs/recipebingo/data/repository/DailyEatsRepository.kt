@@ -19,7 +19,7 @@ class DailyEatsRepository(
     private val userId: String
 
 ) {
-    suspend fun getLocalDailyEats(): Flow<List<DailyEatsWithRecipes>> = dao.getAllDailyEatsWithRecipes()
+    fun getLocalDailyEats(): Flow<List<DailyEatsWithRecipes>> = dao.getAllDailyEatsWithRecipes()
 
     suspend fun insertSingleRecipe(recipe: RecipeEntity) {
         val todayDate = LocalDate.now().format(DateTimeFormatter.ISO_DATE)

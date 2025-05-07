@@ -123,7 +123,6 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
                 recipeViewModel = recipeViewModel,
                 onBackClick = { navController.popBackStack() },
                 nutritionTrackerViewModel = nutritionTrackerViewModel,
-                recipeViewModel = recipeViewModel,
                 context = context
             )
         }
