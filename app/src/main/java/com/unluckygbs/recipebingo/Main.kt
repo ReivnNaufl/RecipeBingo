@@ -40,6 +40,7 @@ import com.unluckygbs.recipebingo.ui.screen.profile.ProfileScreen
 import com.unluckygbs.recipebingo.ui.screen.auth.RegisterScreen
 import com.unluckygbs.recipebingo.ui.screen.onboarding.OnboardingScreen
 import com.unluckygbs.recipebingo.ui.screen.profile.EditProfileScreen
+import com.unluckygbs.recipebingo.ui.screen.recipe.RecipeBookmarkScreen
 import com.unluckygbs.recipebingo.ui.screen.recipe.RecipeDetailScreen
 import com.unluckygbs.recipebingo.ui.screen.recipe.SearchRecipeScreen
 import com.unluckygbs.recipebingo.ui.screen.start.StartScreen
@@ -112,6 +113,9 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
         }
         composable("searchingredient") {
             SearchIngredientScreen(modifier,navController,authViewModel,ingredientViewModel)
+        }
+        composable("bookmarkedrecipe"){
+            RecipeBookmarkScreen(modifier,navController,authViewModel,recipeViewModel)
         }
         composable(
             route = "detailedrecipe/{recipeId}",

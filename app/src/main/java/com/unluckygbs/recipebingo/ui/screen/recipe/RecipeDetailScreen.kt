@@ -12,6 +12,8 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -172,12 +174,14 @@ fun RecipeDetailScreenContent(
                 .align(Alignment.BottomCenter),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            FloatingActionButton(
-                onClick = onSaveClick,
-                backgroundColor = Color(0xFF00C853)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Bookmark")
-            }
+            BookmarkButton(onSaveClick = { isBookmarked ->
+                if (isBookmarked) {
+                    // simpan ke bookmark
+                } else {
+                    // hapus dari bookmark
+                }
+            })
+
             var showDialog by remember { mutableStateOf(false) }
 
             if (showDialog) {
@@ -234,6 +238,28 @@ fun RecipeDetailScreenContent(
     }
 }
 
+@Composable
+fun BookmarkButton(
+    modifier: Modifier = Modifier,
+    initialBookmarked: Boolean = false,
+    onSaveClick: (Boolean) -> Unit
+) {
+    var isBookmarked by remember { mutableStateOf(initialBookmarked) }
+
+    FloatingActionButton(
+        onClick = {
+            isBookmarked = !isBookmarked
+            onSaveClick(isBookmarked)
+        },
+        backgroundColor = Color(0xFF00C853),
+        modifier = modifier
+    ) {
+        Icon(
+            imageVector = if (isBookmarked) Icons.Outlined.Star else Icons.Filled.Star,
+            contentDescription = if (isBookmarked) "Remove Bookmark" else "Add Bookmark"
+        )
+    }
+}
 
 
 @Composable
