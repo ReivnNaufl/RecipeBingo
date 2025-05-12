@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,6 +30,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -93,7 +95,13 @@ fun BookmarkedRecipe(
     navController: NavController,
     recipeViewModel: RecipeViewModel
 ) {
-    val recipe = recipeViewModel.allBookmarked
+    val bookmarkedRecipes by recipeViewModel.bookmarkedRecipes.collectAsState()
+    val loading by recipeViewModel.loading.observeAsState(false)
+    val errorMessage by recipeViewModel.errorMessage.observeAsState()
+
+    LaunchedEffect(Unit) {
+        recipeViewModel.getAllBookmarkedRecipes()
+    }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
@@ -119,18 +127,18 @@ fun BookmarkedRecipe(
                 .padding(padding)
                 .padding(16.dp)
         ) {
-            if (recipe.isEmpty()) {
+            if (bookmarkedRecipes.isEmpty()) {
                 Text("No Recipe Bookmarked.", color = Color.Gray)
             } else {
-                recipe.forEach { recipe ->
+                bookmarkedRecipes.forEach { recipe ->
                     SwipeToDeleteBookmarkedItem(
                         name = recipe.title,
                         image = recipe.image,
                         onDeleteConfirmed = {
-
+                            recipeViewModel.removeBookmark(recipe)
                         },
                         onClick = {
-
+                            navController.navigate("detailedrecipe/${recipe.id}")
                         }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -147,7 +155,7 @@ fun SwipeToDeleteBookmarkedItem(
     name: String,
     image: String,
     onDeleteConfirmed: () -> Unit,
-    onClick: () -> Unit // Tambahkan ini
+    onClick: () -> Unit
 ) {
     val dismissState = rememberDismissState()
     val openDialog = remember { mutableStateOf(false) }
@@ -163,14 +171,14 @@ fun SwipeToDeleteBookmarkedItem(
     if (openDialog.value) {
         AlertDialog(
             onDismissRequest = { openDialog.value = false },
-            title = { Text("Delete Ingredient") },
-            text = { Text("Are you sure you want to delete \"$name\"?") },
+            title = { Text("Remove Bookmark") }, // Ubah teks untuk konteks bookmark
+            text = { Text("Are you sure you want to remove \"$name\" from bookmarks?") },
             confirmButton = {
                 TextButton(onClick = {
                     openDialog.value = false
                     onDeleteConfirmed()
                 }) {
-                    Text("Delete")
+                    Text("Remove")
                 }
             },
             dismissButton = {
@@ -187,8 +195,9 @@ fun SwipeToDeleteBookmarkedItem(
         background = {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Red)
+                    .fillMaxWidth()
+                    .heightIn(min = 80.dp) // Tinggi minimum berdasarkan Card
+                    .background(Color.Red, shape = RoundedCornerShape(4.dp))
                     .padding(16.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {
@@ -206,12 +215,15 @@ fun SwipeToDeleteBookmarkedItem(
 @Composable
 fun BookmarkedItem(name: String, imageUrl: String) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 80.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(4.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp) // Padding sama dengan Box
         ) {
             Image(
                 painter = rememberAsyncImagePainter(model = imageUrl),
@@ -229,7 +241,6 @@ fun BookmarkedItem(name: String, imageUrl: String) {
                 modifier = Modifier.weight(1f),
                 fontSize = 16.sp
             )
-
         }
     }
 }

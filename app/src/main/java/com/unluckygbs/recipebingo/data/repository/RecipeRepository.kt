@@ -13,7 +13,9 @@ class RecipeRepository(
     private val userId: String
 ) {
 
-    fun getAllRecipe(): Flow<List<RecipeEntity>> = dao.getAll()
+    suspend fun getAllRecipe(): Flow<List<RecipeEntity>> = dao.getAll()
+
+    fun getAllBookmarkedRecipes(): Flow<List<RecipeEntity>> = dao.getAllBookmarked()
 
     suspend fun insertSingleRecipe(recipeEntity: RecipeEntity) {
         dao.insertRecipe(recipeEntity)
@@ -39,5 +41,9 @@ class RecipeRepository(
 
     suspend fun getRecipeById(id: Int): RecipeEntity {
         return dao.getRecipeById(id)
+    }
+
+    suspend fun observeBookmarkStatus(recipeId: Int): Flow<Boolean>{
+        return dao.getBookmarkStatus(recipeId)
     }
 }

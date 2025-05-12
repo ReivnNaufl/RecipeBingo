@@ -17,6 +17,8 @@ import com.unluckygbs.recipebingo.data.repository.RecipeRepository
 import com.unluckygbs.recipebingo.repository.IngredientRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 class RecipeViewModel(
@@ -38,6 +40,12 @@ class RecipeViewModel(
 
     private val _recommendedRecipes = MutableLiveData<List<Recipe>>(emptyList())
     val recommendedRecipes: LiveData<List<Recipe>> = _recommendedRecipes
+
+    private val _isBookmarked = MutableStateFlow(false)
+    val isBookmarked: StateFlow<Boolean> = _isBookmarked.asStateFlow()
+
+    private val _bookmarkedRecipes = MutableStateFlow<List<RecipeEntity>>(emptyList())
+    val bookmarkedRecipes: StateFlow<List<RecipeEntity>> = _bookmarkedRecipes.asStateFlow()
 
     fun fetchRecipe(query: String) {
         viewModelScope.launch {
@@ -172,7 +180,6 @@ class RecipeViewModel(
         }
     }
 
-    val allBookmarked: List<RecipeById> = emptyList()
 
     fun resetState() {
         _recipe.value = emptyList()
@@ -193,11 +200,35 @@ class RecipeViewModel(
         }
     }
 
+
     suspend fun isRecipeExist(id: Int): Boolean {
         return recipeRepository.isRecipeExist(id)
     }
 
     suspend fun getRecipeByIdLocal(id: Int){
         _recipebyid.value = recipeRepository.getRecipeById(id)
+    }
+
+    suspend fun observeBookmarkStatus(recipeId: Int){
+        viewModelScope.launch {
+            recipeRepository.observeBookmarkStatus(recipeId).collect {isBookmarked ->
+                _isBookmarked.value = isBookmarked
+            }
+        }
+    }
+
+    fun getAllBookmarkedRecipes() {
+        viewModelScope.launch {
+            recipeRepository.getAllBookmarkedRecipes().collect { bookmarkedRecipes ->
+                _bookmarkedRecipes.value = bookmarkedRecipes
+            }
+        }
+    }
+
+    fun removeBookmark(recipe: RecipeEntity) {
+        viewModelScope.launch {
+            val updatedRecipe = recipe.copy(isBookmarked = false)
+            recipeRepository.updateOrInsertRecipe(updatedRecipe, changeBookmark = true)
+        }
     }
 }

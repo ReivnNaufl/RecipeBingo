@@ -210,8 +210,11 @@ fun AvailableIngredientsScreen(
 fun IngredientItem(name: String, quantity: String, image: String) {
     val imageUrl = "https://img.spoonacular.com/ingredients_250x250/$image"
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 80.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(4.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -289,8 +292,9 @@ fun SwipeToDeleteIngredientItem(
         background = {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Red)
+                    .fillMaxWidth()
+                    .heightIn(min = 80.dp) // Tinggi minimum berdasarkan Card
+                    .background(Color.Red, shape = RoundedCornerShape(4.dp))
                     .padding(16.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {

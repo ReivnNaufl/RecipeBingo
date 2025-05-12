@@ -17,8 +17,14 @@ interface RecipeDao {
     @Query("SELECT * FROM recipe")
     fun getAll(): Flow<List<RecipeEntity>>
 
+    @Query("SELECT * FROM recipe WHERE isBookmarked = 1")
+    fun getAllBookmarked(): Flow<List<RecipeEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRecipe(recipeEntity: RecipeEntity)
+
+    @Query("SELECT isBookmarked FROM recipe WHERE id = :recipeId")
+    fun getBookmarkStatus(recipeId: Int): Flow<Boolean>
 
     @Query("SELECT EXISTS(SELECT 1 FROM recipe WHERE id = :id LIMIT 1)")
     suspend fun isRecipeExist(id: Int): Boolean
