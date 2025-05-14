@@ -1,8 +1,5 @@
 package com.unluckygbs.recipebingo.data.dataclass
 
-import android.icu.text.CaseMap.Title
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 import com.unluckygbs.recipebingo.data.entity.IngredientEntity
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
@@ -81,18 +78,6 @@ data class RecipeById(
     @SerializedName("analyzedInstructions") val analyzedInstruction: List<AnalyzedInstruction>
 )
 
-fun RecipeById.toRecipeEntity(isBookmarked: Boolean): RecipeEntity {
-    return RecipeEntity(
-        id = this.id,
-        title = this.title,
-        image = this.image,
-        extendedIngredient = this.extendedIngredients,
-        nutrition = this.nutrition.nutrient,
-        analyzedInstruction = this.analyzedInstruction,
-        isBookmarked = isBookmarked
-    )
-}
-
 data class Nutrition(
     @SerializedName("nutrients") val nutrient: List<Nutrient>
 )
@@ -111,4 +96,11 @@ data class AnalyzedInstruction(
 data class InstructionStep(
     @SerializedName("number") val number: Int,
     @SerializedName("step") val step: String
+)
+
+data class ConversionResult(
+    @SerializedName("sourceAmount") val sourceAmount: Double,
+    @SerializedName("sourceUnit") val sourceUnit: String,
+    @SerializedName("targetAmount") val targetAmount: Double,
+    @SerializedName("targetUnit") val targetUnit: String
 )

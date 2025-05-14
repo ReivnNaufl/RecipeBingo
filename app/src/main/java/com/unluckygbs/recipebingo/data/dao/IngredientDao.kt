@@ -14,6 +14,9 @@ interface IngredientDao {
     fun getAll(): Flow<List<IngredientEntity>>
 
     @Query("SELECT * FROM ingredients")
+    fun getAllAsList(): List<IngredientEntity>
+
+    @Query("SELECT * FROM ingredients")
     suspend fun getAllOnce(): List<IngredientEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

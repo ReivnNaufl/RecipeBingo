@@ -1,5 +1,6 @@
 package com.unluckygbs.recipebingo.data.apiservice
 
+import com.unluckygbs.recipebingo.data.dataclass.ConversionResult
 import com.unluckygbs.recipebingo.data.dataclass.RandomRecipeResponse
 import com.unluckygbs.recipebingo.data.dataclass.Recipe
 import com.unluckygbs.recipebingo.data.dataclass.RecipeById
@@ -19,6 +20,7 @@ interface SpoonacularApiService {
         @Query("number") number: Int = 3,
         @Query("metaInformation") metaInformation: Boolean = true,
     ): SearchRecipe
+
     @GET("food/ingredients/search?")
     suspend fun getIngredientData(
         @Query("apiKey") apiKey: String,
@@ -26,12 +28,14 @@ interface SpoonacularApiService {
         @Query("query") query: String,
         @Query("metaInformation") metaInformation: Boolean = true,
     ): SearchIngredient
+
     @GET("recipes/random?")
     suspend fun getRandomRecipeData(
         @Query("apiKey") apiKey: String,
         @Query("number") number: Int = 3,
         @Query("metaInformation") metaInformation: Boolean = true
     ): RandomRecipeResponse
+
     @GET("recipes/{id}/information")
     suspend fun getRecipeById(
         @Path("id") id:Int,
@@ -39,6 +43,7 @@ interface SpoonacularApiService {
         @Query("metaInformation") metaInformation: Boolean = true,
         @Query("includeNutrition") includeNutrition: Boolean = true,
     ): RecipeById
+
     @GET("recipes/complexSearch")
     suspend fun findRecipesByIngredients(
         @Query("apiKey") apiKey: String,
@@ -53,5 +58,14 @@ interface SpoonacularApiService {
         @Query("maxFat") maxFat: Int? = null,
         @Query("number") number: Int = 3,
     ): RecipeByIngredients
+
+    @GET("recipes/convert")
+    suspend fun convertIngredientAmount(
+        @Query("apiKey") apiKey: String,
+        @Query("ingredientName") ingredientName: String,
+        @Query("sourceAmount") sourceAmount: Double,
+        @Query("sourceUnit") sourceUnit: String,
+        @Query("targetUnit") targetUnit: String? = "grams"
+    ): ConversionResult
 }
 

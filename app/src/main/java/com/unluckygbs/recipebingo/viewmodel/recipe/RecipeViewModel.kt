@@ -10,7 +10,8 @@ import com.unluckygbs.recipebingo.data.client.KeyClient
 import com.unluckygbs.recipebingo.data.client.SpoonacularClient
 import com.unluckygbs.recipebingo.data.dataclass.Recipe
 import com.unluckygbs.recipebingo.data.dataclass.RecipeById
-import com.unluckygbs.recipebingo.data.dataclass.toRecipeEntity
+import com.unluckygbs.recipebingo.data.dataclass.RecipeIngredient
+import com.unluckygbs.recipebingo.data.toRecipeEntity
 import com.unluckygbs.recipebingo.data.entity.IngredientEntity
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
 import com.unluckygbs.recipebingo.data.repository.RecipeRepository
@@ -25,6 +26,13 @@ class RecipeViewModel(
     private val recipeRepository: RecipeRepository,
     private val ingredientRepository: IngredientRepository
 ) : ViewModel() {
+    sealed class SubtractionResult {
+        data object Success : SubtractionResult()
+        data class Error(val message: String) : SubtractionResult()
+    }
+
+    private val _result = MutableStateFlow<SubtractionResult?>(null)
+    val subtractionResult: StateFlow<SubtractionResult?> = _result.asStateFlow()
 
     private val _recipe = MutableLiveData<List<Recipe>>(emptyList())
     val recipe: LiveData<List<Recipe>> = _recipe
@@ -229,6 +237,17 @@ class RecipeViewModel(
         viewModelScope.launch {
             val updatedRecipe = recipe.copy(isBookmarked = false)
             recipeRepository.updateOrInsertRecipe(updatedRecipe, changeBookmark = true)
+        }
+    }
+
+    fun subtractIngredients(recipeIngredients: List<RecipeIngredient>) {
+        viewModelScope.launch {
+            _result.value = try {
+                ingredientRepository.subtractIngredient(recipeIngredients)
+                SubtractionResult.Success
+            } catch (e: Exception) {
+                SubtractionResult.Error(e.message ?: "Unknown error")
+            }
         }
     }
 }
