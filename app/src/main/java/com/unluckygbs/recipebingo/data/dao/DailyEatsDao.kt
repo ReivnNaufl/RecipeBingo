@@ -37,6 +37,9 @@ interface DailyEatsDao {
     @Query("SELECT * FROM daily_eats WHERE date = :date")
     suspend fun getDailyEatsWithRecipes(date: String): DailyEatsWithRecipes?
 
+    @Query("SELECT * FROM daily_recipe_cross_ref WHERE date = :date")
+    suspend fun getDateCrossRef(date: String): List<DailyRecipeCrossRef>
+
     @Query("DELETE FROM daily_eats")
     suspend fun clearAll()
 

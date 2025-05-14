@@ -1,5 +1,6 @@
 package com.unluckygbs.recipebingo.data.repository
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.unluckygbs.recipebingo.data.dao.DailyEatsDao
 import com.unluckygbs.recipebingo.data.dao.IngredientDao
@@ -9,9 +10,12 @@ import com.unluckygbs.recipebingo.data.entity.DailyEatsWithRecipes
 import com.unluckygbs.recipebingo.data.entity.DailyRecipeCrossRef
 import com.unluckygbs.recipebingo.data.entity.IngredientEntity
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
+import com.unluckygbs.recipebingo.data.toDailyEatsFS
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlin.system.exitProcess
 
 class DailyEatsRepository(
     private val dao: DailyEatsDao,
@@ -60,6 +64,8 @@ class DailyEatsRepository(
 
             // Update with merged values
             dao.updateDailyEatsNutrition(todayDate, mergedNutrition)
+
+            syncSingleDailyEatsToFirestore(date = todayDate)
         }
     }
 
@@ -94,4 +100,23 @@ class DailyEatsRepository(
     }
 
     suspend fun clearAll() = dao.clearAll()
+
+    private suspend fun syncSingleDailyEatsToFirestore(date: String) {
+        try {
+            val dailyEatsWithRecipes = dao.getDailyEatsWithRecipes(date) ?: return
+
+            val ref = firestore.collection("users")
+                .document(userId)
+                .collection("Daily Eats")
+                .document(date)
+
+            val crossRefs = dao.getDateCrossRef(dailyEatsWithRecipes.dailyEats.date)
+
+            ref.set(dailyEatsWithRecipes.toDailyEatsFS(crossRefs)).await()
+            Log.d("SyncDailyEats", "Daily Eats ${dailyEatsWithRecipes.dailyEats.date} synced to Firestore.")
+        } catch (e: Exception) {
+            Log.e("SyncDailyEats", "Failed to sync daily eats: ${e.message}")
+            Log.d("SyncDailyEatsDebug", "userId: $userId, date: $date")
+        }
+    }
 }
