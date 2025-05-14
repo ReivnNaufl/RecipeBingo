@@ -31,6 +31,7 @@ import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
 import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModel
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -45,14 +46,23 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import java.time.Instant
 import java.time.LocalDate
@@ -92,7 +102,7 @@ fun HomeScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun HomeDetail(
     navController: NavController,
@@ -106,8 +116,15 @@ fun HomeDetail(
     val selectedDate = datePickerState.selectedDateMillis?.let {
         Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
     } ?: LocalDate.now()
-    val recommended by recipeViewModel.recommendedRecipes.observeAsState(emptyList())
+    val random by recipeViewModel.homeRandomRecipes.observeAsState(emptyList())
+    val isLoading by recipeViewModel.loading.observeAsState(false)
+    var hasFetchedOnce by rememberSaveable{ mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        if (random.isEmpty()) {
+            recipeViewModel.fetchHomeRandomRecipes()
+        }
+    }
 
     LaunchedEffect(selectedDate) {
         nutritionTrackerViewModel.loadDailyEats(selectedDate)
@@ -116,6 +133,12 @@ fun HomeDetail(
     val totalNutrition by nutritionTrackerViewModel.totalNutrition
     val calorie = totalNutrition?.find { it.name == "Calories" }
     val totalCalories = calorie?.amount?.toFloat() ?: 0
+
+    val refreshState = rememberPullRefreshState(
+        refreshing = isLoading,
+        onRefresh = { recipeViewModel.fetchHomeRandomRecipes() }
+    )
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -136,71 +159,85 @@ fun HomeDetail(
             )
         }
     ) { innerPadding ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(innerPadding)
+                .pullRefresh(refreshState)
         ) {
-            // Recipes section
-            item {
-                SectionTitle(title = "Recipes")
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp)
-                ) {
-                    items(5) {
-                        CircleRecipeItem(label = "Label")
-                    }
-                }
-            }
-
-            // Today's Recipes
-            item {
-                SectionTitle(title = "Today's Recipes")
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp)
-                ) {
-                    items(3) { index ->
-                        RectangleRecipeItem(rank = "${index + 1}st")
-                    }
-                }
-            }
-
-            // Your Ingredients
-            item {
-                SectionTitle(title = "Your Ingredients")
-                if (ingredients.isEmpty()) {
-                    Text(
-                        text = "No ingredients found.",
-                        color = Color.Gray,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Recipes section
+                item {
+                    SectionTitle(title = "Recipes")
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         contentPadding = PaddingValues(horizontal = 16.dp)
                     ) {
-                        items(ingredients) { ingredient ->
-                            IngredientItem(name = ingredient.name, image = ingredient.image)
+                        items(random) { recipe ->
+                            CircleRecipeItem(
+                                label = recipe.title,
+                                imageUrl = recipe.image
+                            ) {
+                                navController.navigate("detailedrecipe/${recipe.id}")
+                            }
                         }
                     }
                 }
-            }
 
-            // Today's Nutrition
-            item {
-                SectionTitle(title = "Today's Nutrition")
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularNutritionProgress(kcal = totalCalories.toFloat())
+                // Today's Recipes
+                item {
+                    SectionTitle(title = "Today's Recipes")
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp)
+                    ) {
+                        items(3) { index ->
+                            RectangleRecipeItem(rank = "${index + 1}st")
+                        }
+                    }
+                }
+
+                // Your Ingredients
+                item {
+                    SectionTitle(title = "Your Ingredients")
+                    if (ingredients.isEmpty()) {
+                        Text(
+                            text = "No ingredients found.",
+                            color = Color.Gray,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    } else {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp)
+                        ) {
+                            items(ingredients) { ingredient ->
+                                IngredientItem(name = ingredient.name, image = ingredient.image)
+                            }
+                        }
+                    }
+                }
+
+                // Today's Nutrition
+                item {
+                    SectionTitle(title = "Today's Nutrition")
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularNutritionProgress(kcal = totalCalories.toFloat())
+                    }
                 }
             }
+            PullRefreshIndicator(
+                refreshing = isLoading,
+                state = refreshState,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
         }
     }
 }
@@ -216,20 +253,6 @@ fun SectionTitle(title: String) {
     ) {
         Text(text = title, style = MaterialTheme.typography.titleMedium)
         Icon(Icons.Default.KeyboardArrowDown, contentDescription = null)
-    }
-}
-
-@Composable
-fun CircleRecipeItem(label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .size(72.dp)
-                .clip(CircleShape)
-                .background(Color.Gray)
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = label, fontSize = 12.sp)
     }
 }
 
@@ -290,6 +313,35 @@ fun CircularNutritionProgress(kcal: Float) {
             text = "$kcal\nKcal",
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun CircleRecipeItem(
+    label: String,
+    imageUrl: String,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = label,
+            modifier = Modifier
+                .size(72.dp)
+                .clip(CircleShape),
+            contentScale = ContentScale.Crop
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.width(72.dp)
         )
     }
 }

@@ -36,6 +36,13 @@ interface SpoonacularApiService {
         @Query("metaInformation") metaInformation: Boolean = true
     ): RandomRecipeResponse
 
+    @GET("recipes/random?")
+    suspend fun getRandomRecipeForHome(
+        @Query("apiKey") apiKey: String,
+        @Query("number") number: Int = 5,
+        @Query("metaInformation") metaInformation: Boolean = true
+    ): RandomRecipeResponse
+
     @GET("recipes/{id}/information")
     suspend fun getRecipeById(
         @Path("id") id:Int,

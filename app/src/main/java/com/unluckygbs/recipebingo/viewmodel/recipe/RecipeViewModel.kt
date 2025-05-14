@@ -49,6 +49,9 @@ class RecipeViewModel(
     private val _recommendedRecipes = MutableLiveData<List<Recipe>>(emptyList())
     val recommendedRecipes: LiveData<List<Recipe>> = _recommendedRecipes
 
+    private val _homeRamdomRecipes = MutableLiveData<List<Recipe>>(emptyList())
+    val homeRandomRecipes: LiveData<List<Recipe>> = _homeRamdomRecipes
+
     private val _isBookmarked = MutableStateFlow(false)
     val isBookmarked: StateFlow<Boolean> = _isBookmarked.asStateFlow()
 
@@ -91,6 +94,29 @@ class RecipeViewModel(
                 )
 
                 _recommendedRecipes.value = response.randomResults
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to load recommended recipes."
+            } finally {
+                _loading.value = false
+            }
+        }
+    }
+
+    fun fetchHomeRandomRecipes() {
+        viewModelScope.launch {
+            _loading.value = true
+            _errorMessage.value = null
+            _recipe.value = emptyList()
+
+            try {
+                val keyResponse = KeyClient.apiService.getapikey()
+                val apiKey = keyResponse.key
+
+                val response = SpoonacularClient.apiService.getRandomRecipeForHome(
+                    apiKey = apiKey,
+                )
+
+                _homeRamdomRecipes.value = response.randomResults
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to load recommended recipes."
             } finally {
