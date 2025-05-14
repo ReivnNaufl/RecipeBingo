@@ -1,8 +1,19 @@
 package com.unluckygbs.recipebingo
 
 import android.content.Context
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
@@ -12,13 +23,18 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavType
@@ -147,49 +163,115 @@ fun App(
     mainViewModel: MainViewModel = viewModel(),
     nutritionTrackerViewModel: NutritionTrackerViewModel
 ) {
-
     val navItemList = listOf(
         NavItem("Home", Icons.Default.Home),
         NavItem("Search", Icons.Default.Search),
         NavItem("Stock", Icons.Default.Add),
-        NavItem("Track",Icons.Default.Check),
+        NavItem("Track", Icons.Default.Check),
         NavItem("Profile", Icons.Default.AccountCircle)
     )
 
     val selectedIndex by mainViewModel.selectedIndex
 
-
-    Scaffold (
+    Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            NavigationBar {
-                navItemList.forEachIndexed{index, navItem ->
+            NavigationBar(
+                containerColor = Color(0xFFF5F5F5), // Latar belakang abu-abu muda
+                contentColor = Color.Black,
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .background(
+                        color = Color(0xFFF5F5F5),
+                        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 0.dp, bottomStart = 16.dp, bottomEnd = 0.dp)
+                    )
+            ) {
+                navItemList.forEachIndexed { index, navItem ->
                     NavigationBarItem(
                         selected = selectedIndex == index,
                         onClick = { mainViewModel.setSelectedIndex(index) },
                         icon = {
-                            Icon(imageVector = navItem.icon, "icon")
+                            if (selectedIndex == index) {
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            color = Color(0xFF00C853),
+                                            shape = CircleShape
+                                        )
+                                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = navItem.icon,
+                                            contentDescription = navItem.label,
+                                            tint = Color.White,
+                                            modifier = Modifier.size(24.dp) // Ikon lebih besar untuk item yang dipilih
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = navItem.label,
+                                            color = Color.White,
+                                            fontSize = 12.sp,
+                                            modifier = Modifier.wrapContentWidth()
+                                        )
+                                    }
+                                }
+                            } else {
+                                Icon(
+                                    imageVector = navItem.icon,
+                                    contentDescription = navItem.label,
+                                    tint = Color.Gray,
+                                    modifier = Modifier.size(18.dp) // Ikon lebih kecil untuk item yang tidak dipilih
+                                )
+                            }
                         },
-                        label = {
-                            Text(text = navItem.label)
-                        }
+                        label = { /* Kosongkan label bawaan, kita atur di icon */ },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color(0xFF00C853),
+                            unselectedIconColor = Color.Gray,
+                            selectedTextColor = Color(0xFF00C853),
+                            unselectedTextColor = Color.Gray,
+                            indicatorColor = Color.Transparent
+                        ),
+                        modifier = Modifier
+                            .weight(if (selectedIndex == index) 1.5f else 1f)
+                            .widthIn(min = if (selectedIndex == index) 120.dp else 40.dp) // Tingkatkan lebar minimum untuk item yang dipilih
                     )
-
                 }
             }
         }
     ) { innerPadding ->
-        ContentScreen(modifier = Modifier.padding(innerPadding), navController = navController, authViewModel = authViewModel,selectedIndex, ingredientViewModel = ingredientViewModel, recipeViewModel = recipeViewModel, nutritionTrackerViewModel = nutritionTrackerViewModel)
+        ContentScreen(
+            modifier = Modifier.padding(innerPadding),
+            navController = navController,
+            authViewModel = authViewModel,
+            selectedIndex = selectedIndex,
+            ingredientViewModel = ingredientViewModel,
+            recipeViewModel = recipeViewModel,
+            nutritionTrackerViewModel = nutritionTrackerViewModel
+        )
     }
 }
 
 @Composable
-fun ContentScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, selectedIndex : Int,ingredientViewModel: IngredientViewModel, recipeViewModel: RecipeViewModel, nutritionTrackerViewModel: NutritionTrackerViewModel) {
-    when(selectedIndex){
-        0 -> HomeScreen(modifier,navController,authViewModel,recipeViewModel,nutritionTrackerViewModel,ingredientViewModel)
-        1 -> SearchRecipeScreen(modifier,navController,authViewModel,recipeViewModel)
-        2 -> IngredientScreen(modifier,navController,authViewModel,ingredientViewModel)
-        3 -> NutritionTrackerScreen(modifier,navController,authViewModel,nutritionTrackerViewModel)
-        4 -> ProfileScreen(modifier,navController,authViewModel)
+fun ContentScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    authViewModel: AuthViewModel,
+    selectedIndex: Int,
+    ingredientViewModel: IngredientViewModel,
+    recipeViewModel: RecipeViewModel,
+    nutritionTrackerViewModel: NutritionTrackerViewModel
+) {
+    when (selectedIndex) {
+        0 -> HomeScreen(modifier, navController, authViewModel, recipeViewModel, nutritionTrackerViewModel, ingredientViewModel)
+        1 -> SearchRecipeScreen(modifier, navController, authViewModel, recipeViewModel)
+        2 -> IngredientScreen(modifier, navController, authViewModel, ingredientViewModel)
+        3 -> NutritionTrackerScreen(modifier, navController, authViewModel, nutritionTrackerViewModel)
+        4 -> ProfileScreen(modifier, navController, authViewModel)
     }
 }
+
