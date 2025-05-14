@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class RecipeViewModel(
     private val recipeRepository: RecipeRepository,
@@ -57,6 +58,11 @@ class RecipeViewModel(
 
     private val _bookmarkedRecipes = MutableStateFlow<List<RecipeEntity>>(emptyList())
     val bookmarkedRecipes: StateFlow<List<RecipeEntity>> = _bookmarkedRecipes.asStateFlow()
+
+    private val _dailyRecipes = MutableLiveData<List<Recipe>>(emptyList())
+    val dailyRecipes: LiveData<List<Recipe>> = _dailyRecipes
+
+    private var lastUpdatedDate: LocalDate? = null
 
     fun fetchRecipe(query: String) {
         viewModelScope.launch {
@@ -208,6 +214,44 @@ class RecipeViewModel(
                 _recommendedRecipes.value = response.results
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to fetch recipes by nutrition."
+            } finally {
+                _loading.value = false
+            }
+        }
+    }
+
+    fun fetchDailyRecipesOncePerDay(nutrients: Map<String, Int>) {
+        val today = LocalDate.now()
+        if (lastUpdatedDate == today && _dailyRecipes.value?.isNotEmpty() == true) return
+
+        viewModelScope.launch {
+            _loading.value = true
+            _errorMessage.value = null
+            try {
+                val apiKey = KeyClient.apiService.getapikey().key
+                val ingredients = ingredientRepository.getIncludeIngredientsQuery()
+
+                val response = SpoonacularClient.apiService.findRecipesByIngredients(
+                    apiKey = apiKey,
+                    ingredients = ingredients,
+                    minCalories = nutrients["minCalories"],
+                    maxCalories = nutrients["maxCalories"],
+                    minProtein = nutrients["minProtein"],
+                    maxProtein = nutrients["maxProtein"],
+                    minSugar = nutrients["minSugar"],
+                    maxSugar = nutrients["maxSugar"],
+                    minFat = nutrients["minFat"],
+                    maxFat = nutrients["maxFat"]
+                )
+
+                _dailyRecipes.value = if (response.results.size >= 3) {
+                    response.results.shuffled().take(3)
+                } else {
+                    response.results
+                }
+                lastUpdatedDate = today
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to fetch daily recipes."
             } finally {
                 _loading.value = false
             }

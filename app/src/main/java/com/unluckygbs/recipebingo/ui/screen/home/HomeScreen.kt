@@ -110,13 +110,13 @@ fun HomeDetail(
     nutritionTrackerViewModel: NutritionTrackerViewModel,
     ingredientViewModel: IngredientViewModel
 ) {
-    val recipe by recipeViewModel.recipe.observeAsState(emptyList())
     val ingredients by ingredientViewModel.availableIngredients.observeAsState(emptyList())
     val datePickerState = rememberDatePickerState()
     val selectedDate = datePickerState.selectedDateMillis?.let {
         Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
     } ?: LocalDate.now()
     val random by recipeViewModel.homeRandomRecipes.observeAsState(emptyList())
+    val dailyRecipes by recipeViewModel.dailyRecipes.observeAsState(emptyList())
     val isLoading by recipeViewModel.loading.observeAsState(false)
     var hasFetchedOnce by rememberSaveable{ mutableStateOf(false) }
 
@@ -124,6 +124,17 @@ fun HomeDetail(
         if (random.isEmpty()) {
             recipeViewModel.fetchHomeRandomRecipes()
         }
+        val dailyNutrients = mapOf(
+            "minCalories" to 200,
+            "maxCalories" to 800,
+            "minProtein" to 5,
+            "maxProtein" to 30,
+            "minSugar" to 0,
+            "maxSugar" to 20,
+            "minFat" to 0,
+            "maxFat" to 25
+        )
+        recipeViewModel.fetchDailyRecipesOncePerDay(dailyNutrients)
     }
 
     LaunchedEffect(selectedDate) {
@@ -193,8 +204,13 @@ fun HomeDetail(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         contentPadding = PaddingValues(horizontal = 16.dp)
                     ) {
-                        items(3) { index ->
-                            RectangleRecipeItem(rank = "${index + 1}st")
+                        items(dailyRecipes) { recipe ->
+                            RectangleRecipeItem(
+                                rank = recipe.title,
+                                imageUrl = recipe.image
+                            ) {
+                                navController.navigate("detailedrecipe/${recipe.id}")
+                            }
                         }
                     }
                 }
@@ -257,20 +273,27 @@ fun SectionTitle(title: String) {
 }
 
 @Composable
-fun RectangleRecipeItem(rank: String) {
+fun RectangleRecipeItem(rank: String, imageUrl: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .width(200.dp)
             .height(120.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.LightGray)
+            .clickable { onClick() }
     ) {
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = rank,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
         Text(
             text = rank,
             modifier = Modifier
-                .align(Alignment.BottomEnd)
+                .align(Alignment.BottomStart)
                 .padding(8.dp),
-            style = MaterialTheme.typography.labelMedium
+            style = MaterialTheme.typography.labelMedium,
+            color = Color.White
         )
     }
 }
