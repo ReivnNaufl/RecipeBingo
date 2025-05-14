@@ -2,6 +2,7 @@ package com.unluckygbs.recipebingo.ui.screen.profile
 
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -52,6 +53,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.firestore.FirebaseFirestore
 import com.unluckygbs.recipebingo.util.base64ToImageBitmap
+import com.unluckygbs.recipebingo.util.isOnline
 import com.unluckygbs.recipebingo.util.uriToBase64
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 
@@ -66,15 +68,6 @@ fun EditProfileScreen(navController: NavController, authViewModel: AuthViewModel
     val context = LocalContext.current
     var profileImageBase64 by remember { mutableStateOf<String?>(null) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    if (selectedImageUri != null) {
-        val base64String = uriToBase64(context, selectedImageUri!!)
-        authViewModel.updateProfileImageBase64(
-            base64String ?: "",
-            onSuccess = { /* optional: navigateUp() or show toast */ },
-            onError = { message -> Log.e("Profile", message) }
-        )
-    }
-
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -215,15 +208,27 @@ fun EditProfileScreen(navController: NavController, authViewModel: AuthViewModel
 
                 Button(
                     onClick = {
-                        userId?.let {
-                            val updatedData = mapOf("username" to displayName)
-                            FirebaseFirestore.getInstance()
-                                .collection("users")
-                                .document(it)
-                                .update(updatedData)
-                                .addOnSuccessListener {
-                                    navController.navigateUp()
+                        userId?.let { uid ->
+                            val base64String = selectedImageUri?.let {
+                                uriToBase64(context, it)
+                            } ?: profileImageBase64.orEmpty()
+
+                            authViewModel.saveUserProfileChanges(
+                                uid = uid,
+                                username = displayName,
+                                email = email,
+                                profileImgBase64 = base64String,
+                                onSuccess = {
+                                    // Optional: bisa tampilkan toast "Synced"
+                                },
+                                onError = { message ->
+                                    Log.e("SaveProfile", message)
                                 }
+                            )
+                            if (!isOnline(context)) {
+                                Toast.makeText(context, "Perubahan akan disinkronkan saat online", Toast.LENGTH_SHORT).show()
+                            }
+                            navController.navigateUp()
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C853)),

@@ -18,10 +18,12 @@ import androidx.lifecycle.lifecycleScope
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.unluckygbs.recipebingo.data.database.AppDatabase
+import com.unluckygbs.recipebingo.data.repository.UserRepository
 import com.unluckygbs.recipebingo.repository.IngredientRepository
 import com.unluckygbs.recipebingo.ui.theme.RecipeBingoTheme
 import com.unluckygbs.recipebingo.util.DataStoreManager
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
+import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModelFactory
 import kotlinx.coroutines.launch
 
 
@@ -30,8 +32,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val authViewModel : AuthViewModel by viewModels()
+
         val firestore = FirebaseFirestore.getInstance()
+        val userDao = AppDatabase.getDatabase(this).userDao()
+        val userRepository = UserRepository(userDao, firestore)
+        val authViewModel: AuthViewModel by viewModels {
+            AuthViewModelFactory(userRepository)
+        }
+        authViewModel.syncUserProfileIfOnline(this)
         val ingredientRepository = IngredientRepository(AppDatabase.getDatabase(this).ingredientDao(), firestore = firestore, userId = authViewModel.getCurrentUserUid() ?: "")
         val dataStoreManager = DataStoreManager(applicationContext)
 

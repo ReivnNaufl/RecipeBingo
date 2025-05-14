@@ -1,10 +1,12 @@
 package com.unluckygbs.recipebingo.viewmodel.auth
 
 import android.content.Context
+import android.net.ConnectivityManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.AuthCredential
@@ -14,8 +16,10 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.unluckygbs.recipebingo.data.dataclass.UserProfile
 import com.unluckygbs.recipebingo.data.entity.UserEntity
+import com.unluckygbs.recipebingo.data.repository.UserRepository
+import kotlinx.coroutines.launch
 
-class AuthViewModel : ViewModel() {
+class AuthViewModel(private val userRepository: UserRepository) : ViewModel() {
 
     private val auth : FirebaseAuth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
@@ -172,6 +176,76 @@ class AuthViewModel : ViewModel() {
             .update("profileImageBase64", base64String)
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { onError(it.message ?: "Unknown error") }
+    }
+
+    fun saveUserLocally(
+        uid: String,
+        username: String,
+        email: String,
+        base64Image: String
+    ) {
+        viewModelScope.launch {
+            val user = UserEntity(
+                id = 1,
+                uid = uid,
+                username = username,
+                email = email,
+                profileImgBase64 = base64Image
+            )
+            userRepository.saveUserLocally(user)
+        }
+    }
+
+    fun syncUserProfileIfOnline(context: Context) {
+        if (isOnline(context)) {
+            viewModelScope.launch {
+                val localUser = userRepository.getLocalUser() ?: return@launch
+                userRepository.syncUserToFirestore(localUser)
+            }
+        }
+    }
+
+    fun isOnline(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        return connectivityManager.activeNetworkInfo?.isConnected == true
+    }
+
+    fun saveUserProfileChanges(
+        uid: String,
+        username: String,
+        email: String,
+        profileImgBase64: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        // Simpan ke database lokal
+        viewModelScope.launch {
+            val user = UserEntity(
+                uid = uid,
+                username = username,
+                email = email,
+                profileImgBase64 = profileImgBase64
+            )
+            userRepository.saveUserLocally(user)
+
+            try {
+                // Simpan ke Firestore juga
+                val data = mapOf(
+                    "username" to username,
+                    "email" to email,
+                    "profileImageBase64" to profileImgBase64
+                )
+                FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .document(uid)
+                    .update(data)
+                    .addOnSuccessListener { onSuccess() }
+                    .addOnFailureListener { onError(it.message ?: "Unknown error") }
+            } catch (e: Exception) {
+                onError(e.message ?: "Update failed")
+            }
+        }
     }
 
 }
