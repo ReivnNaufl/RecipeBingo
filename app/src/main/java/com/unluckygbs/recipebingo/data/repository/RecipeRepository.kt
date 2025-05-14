@@ -43,7 +43,7 @@ class RecipeRepository(
         return dao.getRecipeById(id)
     }
 
-    suspend fun observeBookmarkStatus(recipeId: Int): Flow<Boolean>{
+    suspend fun observeBookmarkStatus(recipeId: Int): Flow<Boolean?>{
         return dao.getBookmarkStatus(recipeId)
     }
 }

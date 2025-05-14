@@ -220,7 +220,7 @@ class RecipeViewModel(
     suspend fun observeBookmarkStatus(recipeId: Int){
         viewModelScope.launch {
             recipeRepository.observeBookmarkStatus(recipeId).collect {isBookmarked ->
-                _isBookmarked.value = isBookmarked
+                _isBookmarked.value = isBookmarked ?: false
             }
         }
     }
