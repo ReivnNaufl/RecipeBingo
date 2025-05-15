@@ -50,7 +50,7 @@ interface DailyEatsDao {
     suspend fun updateCrossRef(crossRef: DailyRecipeCrossRef)
 
     @Query("Update daily_recipe_cross_ref SET amount = amount + 1 WHERE date = :date AND id = :id")
-    suspend fun recipeAmountPlusOne(date: String, id: Int)
+    suspend fun recipeAmountPlusOne(date: String, id: Int): Int
 
     @Query("UPDATE daily_eats SET totalNutrition = :nutrition WHERE date = :date")
     suspend fun updateDailyEatsNutrition(date: String, nutrition: List<Nutrient>)
