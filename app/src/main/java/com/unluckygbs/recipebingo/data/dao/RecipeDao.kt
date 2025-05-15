@@ -32,6 +32,9 @@ interface RecipeDao {
     @Query("UPDATE recipe SET isBookmarked = :isBookmarked WHERE id = :id")
     suspend fun updateBookmark(id: Int, isBookmarked: Boolean)
 
+    @Query("SELECT id FROM recipe WHERE isBookmarked = 1")
+    suspend fun getBookmarksID(): List<Int>
+
     @Query("SELECT * FROM recipe WHERE id = :id")
     suspend fun getRecipeById(id: Int): RecipeEntity
 

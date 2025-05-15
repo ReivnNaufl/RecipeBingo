@@ -1,7 +1,11 @@
 package com.unluckygbs.recipebingo.data
 
+import com.unluckygbs.recipebingo.data.dataclass.AnalyzedInstruction
 import com.unluckygbs.recipebingo.data.dataclass.DailyEatsFS
+import com.unluckygbs.recipebingo.data.dataclass.Nutrient
 import com.unluckygbs.recipebingo.data.dataclass.RecipeById
+import com.unluckygbs.recipebingo.data.dataclass.RecipeFS
+import com.unluckygbs.recipebingo.data.dataclass.RecipeIngredient
 import com.unluckygbs.recipebingo.data.dataclass.RecipesID
 import com.unluckygbs.recipebingo.data.entity.DailyEatsWithRecipes
 import com.unluckygbs.recipebingo.data.entity.DailyRecipeCrossRef
@@ -47,5 +51,20 @@ fun DailyEatsWithRecipes.toDailyEatsFS(crossRefs: List<DailyRecipeCrossRef>): Da
         date = this.dailyEats.date,
         recipesID = recipesID.toList(),
         totalNutrition = this.dailyEats.totalNutrition
+    )
+}
+
+fun List<Int>.toStringList(): List<String> {
+    return this.map { it.toString() }
+}
+
+fun RecipeEntity.toRecipeFS(): RecipeFS {
+    return RecipeFS(
+        id = this.id,
+        image = this.image,
+        name = this.title,
+        extendedIngredient = this.extendedIngredient,
+        analyzedInstruction = this.analyzedInstruction,
+        nutrition = this.nutrition
     )
 }
