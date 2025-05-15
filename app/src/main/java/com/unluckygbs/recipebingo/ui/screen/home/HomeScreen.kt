@@ -125,14 +125,14 @@ fun HomeDetail(
             recipeViewModel.fetchHomeRandomRecipes()
         }
         val dailyNutrients = mapOf(
-            "minCalories" to 200,
-            "maxCalories" to 800,
-            "minProtein" to 5,
-            "maxProtein" to 30,
+            "minCalories" to 0,
+            "maxCalories" to 1000,
+            "minProtein" to 0,
+            "maxProtein" to 1000,
             "minSugar" to 0,
-            "maxSugar" to 20,
+            "maxSugar" to 1000,
             "minFat" to 0,
-            "maxFat" to 25
+            "maxFat" to 1000
         )
         recipeViewModel.fetchDailyRecipesOncePerDay(dailyNutrients)
     }

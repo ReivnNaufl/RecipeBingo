@@ -19,7 +19,6 @@ import com.unluckygbs.recipebingo.repository.IngredientRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
