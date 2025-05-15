@@ -15,6 +15,7 @@ import com.unluckygbs.recipebingo.data.toRecipeEntity
 import com.unluckygbs.recipebingo.data.entity.IngredientEntity
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
 import com.unluckygbs.recipebingo.data.repository.RecipeRepository
+import com.unluckygbs.recipebingo.data.toStringList
 import com.unluckygbs.recipebingo.repository.IngredientRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -274,6 +275,12 @@ class RecipeViewModel(
     fun updateOrInsertRecipe(recipeEntity: RecipeEntity, changeBookmark: Boolean) {
         viewModelScope.launch {
             recipeRepository.updateOrInsertRecipe(recipeEntity, changeBookmark)
+            if (!recipeRepository.isRecipeExistsInFireStore(recipeEntity)) {
+                recipeRepository.syncSingleRecipe(recipeEntity)
+            }
+            if (changeBookmark) {
+                recipeRepository.syncRecipeBookmarkToFireStore()
+            }
         }
     }
 
@@ -317,6 +324,20 @@ class RecipeViewModel(
             } catch (e: Exception) {
                 SubtractionResult.Error(e.message ?: "Unknown error")
             }
+        }
+    }
+
+    fun insertRecipeToFireStore(recipe: RecipeEntity) {
+        viewModelScope.launch {
+            if (!recipeRepository.isRecipeExistsInFireStore(recipe)) {
+                recipeRepository.syncSingleRecipe(recipe)
+            }
+        }
+    }
+
+    fun insertBookmarksToFireStore() {
+        viewModelScope.launch {
+            recipeRepository.syncRecipeBookmarkToFireStore()
         }
     }
 }

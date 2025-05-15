@@ -260,6 +260,7 @@ fun BookmarkButton(
         onClick = {
             Log.d("BookmarkButton", "Clicked, toggling bookmark")
             onSaveClick()
+
         },
         backgroundColor = Color(0xFF00C853),
         modifier = modifier

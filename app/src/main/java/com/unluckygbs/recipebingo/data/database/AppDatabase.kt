@@ -22,7 +22,7 @@ import com.unluckygbs.recipebingo.data.repository.DailyEatsRepository
     IngredientEntity::class,
     RecipeEntity::class,
     DailyEatsEntity::class,
-    DailyRecipeCrossRef::class], version = 3)
+    DailyRecipeCrossRef::class], version = 4)
 @TypeConverters(AppTypeConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao

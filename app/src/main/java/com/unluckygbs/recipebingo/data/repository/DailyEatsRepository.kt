@@ -64,9 +64,8 @@ class DailyEatsRepository(
 
             // Update with merged values
             dao.updateDailyEatsNutrition(todayDate, mergedNutrition)
-
-            syncSingleDailyEatsToFirestore(date = todayDate)
         }
+        syncSingleDailyEatsToFirestore(date = todayDate)
     }
 
     private fun mergeNutrients(list1: List<Nutrient>?, list2: List<Nutrient>): List<Nutrient> {
@@ -107,7 +106,7 @@ class DailyEatsRepository(
 
             val ref = firestore.collection("users")
                 .document(userId)
-                .collection("Daily Eats")
+                .collection("Daily_Eats")
                 .document(date)
 
             val crossRefs = dao.getDateCrossRef(dailyEatsWithRecipes.dailyEats.date)
