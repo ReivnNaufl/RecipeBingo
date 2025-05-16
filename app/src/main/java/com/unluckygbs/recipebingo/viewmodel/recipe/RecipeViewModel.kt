@@ -113,7 +113,7 @@ class RecipeViewModel(
             _recipe.value = emptyList()
 
             try {
-                val keyResponse = KeyClient.apiService.getapikey()
+                val keyResponse = KeyClient.apiService.getapikey("RAND5")
                 val apiKey = keyResponse.key
 
                 val response = SpoonacularClient.apiService.getRandomRecipeForHome(
@@ -162,7 +162,7 @@ class RecipeViewModel(
             _recipe.value = emptyList()
 
             try {
-                val apiKey = KeyClient.apiService.getapikey().key
+                val apiKey = KeyClient.apiService.getapikey("SEARCH3").key
                 val ingredients = ingredientRepository.getIncludeIngredientsQuery()
 
                 val response = SpoonacularClient.apiService.findRecipesByIngredients(

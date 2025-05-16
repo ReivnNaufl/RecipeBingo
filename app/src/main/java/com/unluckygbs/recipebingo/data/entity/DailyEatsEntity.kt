@@ -37,7 +37,7 @@ data class DailyEatsEntity(
 data class DailyRecipeCrossRef(
     val date: String,
     val id: Int,
-    val amount: Int = 1,
+    val amount: Int,
 )
 
 data class DailyEatsWithRecipes(
