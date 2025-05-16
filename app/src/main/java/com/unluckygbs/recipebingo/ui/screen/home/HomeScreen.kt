@@ -119,10 +119,11 @@ fun HomeDetail(
     val dailyRecipes by recipeViewModel.dailyRecipes.observeAsState(emptyList())
     val isLoading by recipeViewModel.loading.observeAsState(false)
     var hasFetchedOnce by rememberSaveable{ mutableStateOf(false) }
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         if (random.isEmpty()) {
-            recipeViewModel.fetchHomeRandomRecipes()
+            recipeViewModel.fetchHomeRandomRecipes() // Random recipe
         }
         val dailyNutrients = mapOf(
             "minCalories" to 0,
@@ -134,7 +135,7 @@ fun HomeDetail(
             "minFat" to 0,
             "maxFat" to 1000
         )
-        recipeViewModel.fetchDailyRecipesOncePerDay(dailyNutrients)
+        recipeViewModel.fetchDailyRecipesOncePerDay(context, dailyNutrients) // Daily Recommendation
     }
 
     LaunchedEffect(selectedDate) {

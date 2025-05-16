@@ -1,22 +1,20 @@
 package com.unluckygbs.recipebingo.viewmodel.recipe
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.unluckygbs.recipebingo.data.client.KeyClient
 import com.unluckygbs.recipebingo.data.client.SpoonacularClient
 import com.unluckygbs.recipebingo.data.dataclass.Recipe
-import com.unluckygbs.recipebingo.data.dataclass.RecipeById
 import com.unluckygbs.recipebingo.data.dataclass.RecipeIngredient
 import com.unluckygbs.recipebingo.data.toRecipeEntity
-import com.unluckygbs.recipebingo.data.entity.IngredientEntity
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
 import com.unluckygbs.recipebingo.data.repository.RecipeRepository
-import com.unluckygbs.recipebingo.data.toStringList
 import com.unluckygbs.recipebingo.repository.IngredientRepository
+import com.unluckygbs.recipebingo.util.DailyPreferenceManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -220,11 +218,13 @@ class RecipeViewModel(
         }
     }
 
-    fun fetchDailyRecipesOncePerDay(nutrients: Map<String, Int>) {
-        val today = LocalDate.now()
-        if (lastUpdatedDate == today && _dailyRecipes.value?.isNotEmpty() == true) return
-
+    fun fetchDailyRecipesOncePerDay(context: Context, nutrients: Map<String, Int>) {
         viewModelScope.launch {
+            val today = LocalDate.now().toString()
+            val lastFetch = DailyPreferenceManager.getLastFetchDate(context)
+
+            if (lastFetch == today && _dailyRecipes.value?.isNotEmpty() == true) return@launch
+
             _loading.value = true
             _errorMessage.value = null
             try {
@@ -244,12 +244,8 @@ class RecipeViewModel(
                     maxFat = nutrients["maxFat"]
                 )
 
-                _dailyRecipes.value = if (response.results.size >= 3) {
-                    response.results.shuffled().take(3)
-                } else {
-                    response.results
-                }
-                lastUpdatedDate = today
+                _dailyRecipes.value = response.results.shuffled().take(3)
+                DailyPreferenceManager.saveLastFetchDate(context, today)
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to fetch daily recipes."
             } finally {
