@@ -62,6 +62,7 @@ class RecipeViewModel(
 
     private var lastUpdatedDate: LocalDate? = null
 
+
     fun fetchRecipe(query: String) {
         viewModelScope.launch {
             _loading.value = true
@@ -218,34 +219,31 @@ class RecipeViewModel(
         }
     }
 
-    fun fetchDailyRecipesOncePerDay(context: Context, nutrients: Map<String, Int>) {
+    fun fetchDailyRecipesOncePerDay(context: Context) {
         viewModelScope.launch {
-            val today = LocalDate.now().toString()
-            val lastFetch = DailyPreferenceManager.getLastFetchDate(context)
-
-            if (lastFetch == today && _dailyRecipes.value?.isNotEmpty() == true) return@launch
-
             _loading.value = true
             _errorMessage.value = null
+            _dailyRecipes.value = emptyList()
+
             try {
+                val cached = recipeRepository.getShuffledDailyRecipes(context) ?: emptyList()
+                if (cached.isNotEmpty()) {
+                    _dailyRecipes.value = cached
+                    return@launch
+                }
+
                 val apiKey = KeyClient.apiService.getapikey().key
                 val ingredients = ingredientRepository.getIncludeIngredientsQuery()
 
-                val response = SpoonacularClient.apiService.findRecipesByIngredients(
+                val response = SpoonacularClient.apiService.findDailyRecipes(
                     apiKey = apiKey,
-                    ingredients = ingredients,
-                    minCalories = nutrients["minCalories"],
-                    maxCalories = nutrients["maxCalories"],
-                    minProtein = nutrients["minProtein"],
-                    maxProtein = nutrients["maxProtein"],
-                    minSugar = nutrients["minSugar"],
-                    maxSugar = nutrients["maxSugar"],
-                    minFat = nutrients["minFat"],
-                    maxFat = nutrients["maxFat"]
+                    ingredients = ingredients
                 )
 
-                _dailyRecipes.value = response.results.shuffled().take(3)
-                DailyPreferenceManager.saveLastFetchDate(context, today)
+                val shuffled = response.results.shuffled().take(3)
+                _dailyRecipes.value = shuffled
+                recipeRepository.saveShuffledDailyRecipes(context, shuffled)
+
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to fetch daily recipes."
             } finally {

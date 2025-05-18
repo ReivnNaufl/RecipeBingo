@@ -1,15 +1,20 @@
 package com.unluckygbs.recipebingo.data.repository
 
+import android.content.Context
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.unluckygbs.recipebingo.data.dao.DailyEatsDao
 import com.unluckygbs.recipebingo.data.dao.RecipeDao
+import com.unluckygbs.recipebingo.data.dataclass.Recipe
 import com.unluckygbs.recipebingo.data.entity.DailyEatsWithRecipes
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
 import com.unluckygbs.recipebingo.data.toDailyEatsFS
 import com.unluckygbs.recipebingo.data.toRecipeFS
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
+import java.time.LocalDate
 
 class RecipeRepository(
     private val dao: RecipeDao,
@@ -92,6 +97,37 @@ class RecipeRepository(
         } catch (e: Exception) {
             Log.e("SyncBookmark", "Failed to check existing recipe: ${e.message}")
             Log.d("SyncBookmarkDebug", "userId: $userId")
+        }
+    }
+
+    fun saveShuffledDailyRecipes(context: Context, recipes: List<Recipe>) {
+        val prefs = context.getSharedPreferences("daily_recipe_prefs", Context.MODE_PRIVATE)
+        val today = LocalDate.now().toString()
+
+        val recipeJson = Gson().toJson(recipes)
+        prefs.edit()
+            .putString("shuffled_recipes", recipeJson)
+            .putString("shuffle_date", today)
+            .apply()
+    }
+
+    fun getShuffledDailyRecipes(context: Context): List<Recipe>? {
+        val prefs = context.getSharedPreferences("daily_recipe_prefs", Context.MODE_PRIVATE)
+        val today = LocalDate.now().toString()
+        val savedDate = prefs.getString("shuffle_date", "")
+
+        return if (savedDate == today) {
+            val json = prefs.getString("shuffled_recipes", null)
+            if (json != null) {
+                try {
+                    val type = object : TypeToken<List<Recipe>>() {}.type
+                    Gson().fromJson(json, type)
+                } catch (e: Exception) {
+                    null
+                }
+            } else null
+        } else {
+            null
         }
     }
 }

@@ -48,7 +48,7 @@ interface SpoonacularApiService {
         @Path("id") id:Int,
         @Query("apiKey") apiKey: String,
         @Query("metaInformation") metaInformation: Boolean = true,
-        @Query("includeNutrition") includeNutrition: Boolean = true,
+        @Query("includeNutrition") includeNutrition: Boolean = true
     ): RecipeById
 
     @GET("recipes/complexSearch")
@@ -64,7 +64,16 @@ interface SpoonacularApiService {
         @Query("minFat") minFat: Int? = null,
         @Query("maxFat") maxFat: Int? = null,
         @Query("number") number: Int = 3,
-    ): RecipeByIngredients
+        @Query("metaInformation") metaInformation: Boolean = true
+        ): RecipeByIngredients
+
+    @GET("recipes/complexSearch")
+    suspend fun findDailyRecipes(
+        @Query("apiKey") apiKey: String,
+        @Query("includeIngredients") ingredients: String,
+        @Query("number") number: Int = 10,
+        @Query("metaInformation") metaInformation: Boolean = true
+        ): RecipeByIngredients
 
     @GET("recipes/convert")
     suspend fun convertIngredientAmount(

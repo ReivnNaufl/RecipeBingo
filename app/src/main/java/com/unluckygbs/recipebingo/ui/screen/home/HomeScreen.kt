@@ -123,19 +123,9 @@ fun HomeDetail(
 
     LaunchedEffect(Unit) {
         if (random.isEmpty()) {
-            recipeViewModel.fetchHomeRandomRecipes() // Random recipe
+            recipeViewModel.fetchHomeRandomRecipes()
         }
-        val dailyNutrients = mapOf(
-            "minCalories" to 0,
-            "maxCalories" to 1000,
-            "minProtein" to 0,
-            "maxProtein" to 1000,
-            "minSugar" to 0,
-            "maxSugar" to 1000,
-            "minFat" to 0,
-            "maxFat" to 1000
-        )
-        recipeViewModel.fetchDailyRecipesOncePerDay(context, dailyNutrients) // Daily Recommendation
+        recipeViewModel.fetchDailyRecipesOncePerDay(context)
     }
 
     LaunchedEffect(selectedDate) {
