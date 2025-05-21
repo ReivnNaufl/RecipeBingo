@@ -4,6 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -116,15 +118,18 @@ fun AvailableIngredientsScreen(
             }
         }
     ) { padding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .padding(padding)
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             if (ingredients.isEmpty()) {
-                Text("No ingredients found.", color = Color.Gray)
+                item {
+                    Text("No ingredients found.", color = Color.Gray)
+                }
             } else {
-                ingredients.forEach { ingredient ->
+                items(ingredients) { ingredient ->
                     SwipeToDeleteIngredientItem(
                         name = ingredient.name,
                         quantity = "${ingredient.quantity} ${ingredient.unit}",
@@ -133,15 +138,15 @@ fun AvailableIngredientsScreen(
                             ingredientViewModel.deleteIngredient(ingredient)
                         },
                         onClick = {
-                            editingIngredient = ingredient // isi state editing
-                            quantity = ingredient.quantity // set nilai awal quantity
-                            scope.launch { sheetState.show() } // tampilkan bottom sheet
+                            editingIngredient = ingredient
+                            quantity = ingredient.quantity
+                            scope.launch { sheetState.show() }
                         }
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
+
         if (editingIngredient != null) {
             ModalBottomSheet(
                 onDismissRequest = {
