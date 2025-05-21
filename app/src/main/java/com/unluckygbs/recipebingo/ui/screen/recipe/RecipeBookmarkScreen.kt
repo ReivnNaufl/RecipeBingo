@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.DismissDirection
@@ -122,15 +124,18 @@ fun BookmarkedRecipe(
             )
         },
     ) { padding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .padding(padding)
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             if (bookmarkedRecipes.isEmpty()) {
-                Text("No Recipe Bookmarked.", color = Color.Gray)
+                item {
+                    Text("No Recipe Bookmarked.", color = Color.Gray)
+                }
             } else {
-                bookmarkedRecipes.forEach { recipe ->
+                items(bookmarkedRecipes) { recipe ->
                     SwipeToDeleteBookmarkedItem(
                         name = recipe.title,
                         image = recipe.image,
