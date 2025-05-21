@@ -118,8 +118,12 @@ class AuthViewModel(
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     if (user != null) {
-                        // Create user document in Firestore if it's the first time login
-                        createUserDocument(user, user.displayName ?: "Google User", user.email ?: "No Email")
+                        val userDocRef = firestore.collection("users").document(user.uid)
+                        userDocRef.get().addOnSuccessListener { document ->
+                            if (!document.exists()) {
+                                createUserDocument(user, user.displayName ?: "Google User", user.email ?: "No Email")
+                            }
+                        }
                     }
                     _authState.value = AuthState.Authenticated
                 } else {
