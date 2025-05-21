@@ -333,4 +333,10 @@ class RecipeViewModel(
             recipeRepository.syncRecipeBookmarkToFireStore()
         }
     }
+
+    fun clearAll() {
+        viewModelScope.launch {
+            recipeRepository.deleteAll()
+        }
+    }
 }

@@ -15,6 +15,10 @@ data class DailyEatsEntity(
     @PrimaryKey @Nonnull var date: String,
     var totalNutrition: List<Nutrient>?
 )
+{
+    // Required for Firestore deserialization
+    constructor() : this("9999-9-9", emptyList())
+}
 
 @Entity(
     tableName = "daily_recipe_cross_ref",

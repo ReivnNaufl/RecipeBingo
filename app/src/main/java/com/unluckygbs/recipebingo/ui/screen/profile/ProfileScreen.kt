@@ -55,12 +55,18 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.unluckygbs.recipebingo.util.base64ToImageBitmap
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
+import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
+import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
+import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModel
 
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    recipeViewModel: RecipeViewModel,
+    ingredientViewModel: IngredientViewModel,
+    nutritionTrackerViewModel: NutritionTrackerViewModel
 ) {
     val authState = authViewModel.authState.observeAsState()
     val context = LocalContext.current
@@ -101,7 +107,12 @@ fun ProfileScreen(
         displayName = displayName,
         email = email,
         photoUrl = photoUrl,
-        onLogoutClick = { authViewModel.signout(context) },
+        onLogoutClick = {
+            nutritionTrackerViewModel.clearAll()
+            recipeViewModel.clearAll()
+            ingredientViewModel.clearAll()
+            authViewModel.signout(context)
+        },
         onEditClick = { navController.navigate("edit_profile") }
     )
 }

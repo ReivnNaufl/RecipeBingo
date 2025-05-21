@@ -1,6 +1,7 @@
 package com.unluckygbs.recipebingo.data.repository
 
 import android.util.Log
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.unluckygbs.recipebingo.data.dao.DailyEatsDao
 import com.unluckygbs.recipebingo.data.dao.RecipeDao
@@ -144,15 +145,21 @@ class DailyEatsRepository(
                 dailyEatsDao.insertDailyEats(dailyEatsEntity)
 
                 crossRefs.chunked(10).forEach { crossRef10->
+                    val recipeIDs = crossRef10.extractIds()
                     val doc = firestore
                         .collection("recipes")
-                        .whereIn("id", crossRef10.extractIds())
+                        .whereIn(FieldPath.documentId(), recipeIDs)
                         .get()
                         .await()
 
                     val recipeFS = doc.documents.mapNotNull {
                         it.toObject(RecipeFS::class.java)
                     }
+
+
+                    Log.d("DailyEatsSyncDebug", "${recipeIDs}")
+                    Log.d("DailyEatsSyncDebug", "${doc.documents}")
+                    Log.d("DailyEatsSyncDebug", "${recipeFS}")
 
                     recipeFS.forEach { recipe ->
                         if (!recipeDao.isRecipeExist(recipe.id)){
@@ -165,11 +172,8 @@ class DailyEatsRepository(
                     }
                 }
             }
-
-
-
         } catch (e: Exception) {
-            Log.e("Sync", "Error sync from Firestore: ${e.message}")
+            Log.e("DailyEatsSync", "Error sync from Firestore: ${e.message}")
         }
     }
 }

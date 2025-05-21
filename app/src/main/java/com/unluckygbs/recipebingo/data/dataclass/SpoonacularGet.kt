@@ -59,15 +59,24 @@ data class RecipeIngredient(
     @SerializedName("original") val original: String,
     @SerializedName("measures") val measures: IngredientMeasure,
 )
+{
+    constructor() : this("", "", IngredientMeasure(IngredientMetric(0.0, "")))
+}
 
 data class IngredientMeasure(
     @SerializedName("metric") val metric: IngredientMetric,
 )
+{
+    constructor() : this(IngredientMetric(0.0, ""))
+}
 
 data class IngredientMetric(
     @SerializedName("amount") val amount: Double,
     @SerializedName("unitLong") val unitLong: String,
 )
+{
+    constructor() : this(0.0, "")
+}
 
 data class RecipeById(
     @SerializedName("id") val id: Int,
@@ -87,16 +96,26 @@ data class Nutrient(
     @SerializedName("amount") val amount: Double,
     @SerializedName("unit") val unit: String,
 )
+{
+    constructor() : this("", 0.0, "")
+}
+
 
 data class AnalyzedInstruction(
     @SerializedName("name") val name: String?,
     @SerializedName("steps") val steps: List<InstructionStep>
 )
+{
+    constructor() : this("", emptyList())
+}
 
 data class InstructionStep(
     @SerializedName("number") val number: Int,
     @SerializedName("step") val step: String
 )
+{
+    constructor() : this(0, "")
+}
 
 data class ConversionResult(
     @SerializedName("sourceAmount") val sourceAmount: Double,

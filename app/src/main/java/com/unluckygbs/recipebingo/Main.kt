@@ -107,6 +107,8 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
 
     LaunchedEffect(authState) {
         ingredientRepository.syncFromFirestoreToRoom()
+        recipeRepository.syncBookmarkedFromFirestore()
+        dailyEatsRepository.syncDailyEatsFromFirestore()
     }
 
     NavHost(navController = navController, startDestination = startDestination, builder = {
@@ -274,7 +276,7 @@ fun ContentScreen(
         1 -> SearchRecipeScreen(modifier, navController, authViewModel, recipeViewModel)
         2 -> IngredientScreen(modifier, navController, authViewModel, ingredientViewModel)
         3 -> NutritionTrackerScreen(modifier, navController, authViewModel, nutritionTrackerViewModel)
-        4 -> ProfileScreen(modifier, navController, authViewModel)
+        4 -> ProfileScreen(modifier, navController, authViewModel, recipeViewModel, ingredientViewModel, nutritionTrackerViewModel)
     }
 }
 
