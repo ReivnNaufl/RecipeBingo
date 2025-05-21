@@ -146,7 +146,8 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
                 recipeViewModel = recipeViewModel,
                 onBackClick = { navController.popBackStack() },
                 nutritionTrackerViewModel = nutritionTrackerViewModel,
-                context = context
+                context = context,
+                ingredientViewModel = ingredientViewModel
             )
         }
         composable("edit_profile") {

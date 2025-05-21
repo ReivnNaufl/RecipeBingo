@@ -36,6 +36,7 @@ import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
 import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 
 @Composable
 fun RecipeDetailScreen(
@@ -44,7 +45,8 @@ fun RecipeDetailScreen(
     onBackClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
     nutritionTrackerViewModel: NutritionTrackerViewModel,
-    context: Context
+    context: Context,
+    ingredientViewModel: IngredientViewModel
 ) {
     val recipeById by recipeViewModel.recipeById.collectAsState()
     val isBookmarked by recipeViewModel.isBookmarked.collectAsState()
@@ -67,6 +69,7 @@ fun RecipeDetailScreen(
         recipeViewModel = recipeViewModel,
         context = context,
         isBookmarked = isBookmarked,
+        ingredientViewModel = ingredientViewModel
     )
 }
 
@@ -78,7 +81,8 @@ fun RecipeDetailScreenContent(
     isBookmarked: Boolean,
     nutritionTrackerViewModel: NutritionTrackerViewModel,
     recipeViewModel: RecipeViewModel,
-    context: Context
+    context: Context,
+    ingredientViewModel: IngredientViewModel
 ) {
     val nutrients = recipeById?.nutrition
         ?.map { "${it.name}: ${it.amount} ${it.unit}" }
@@ -194,7 +198,7 @@ fun RecipeDetailScreenContent(
             )
 
             var showDialog by remember { mutableStateOf(false) }
-
+            var showSecondDialog by remember { mutableStateOf(false) }
             if (showDialog) {
                 AlertDialog(
                     onDismissRequest = { showDialog = false },
@@ -215,7 +219,7 @@ fun RecipeDetailScreenContent(
                             recipeViewModel.updateOrInsertRecipe(insertedData, changeBookmark = false)
                             nutritionTrackerViewModel.insertRecipe(insertedData)
 
-                            Toast.makeText(context, "Recipe added!", Toast.LENGTH_SHORT).show()
+                            showSecondDialog = true
                         }) {
                             Text("Add")
                         }
@@ -225,6 +229,29 @@ fun RecipeDetailScreenContent(
                             Text("Cancel")
                         }
                     }
+                )
+            }
+
+            if (showSecondDialog) {
+                AlertDialog(
+                    onDismissRequest = { showSecondDialog = false },
+                    title = { Text("Substract Ingredient?") },
+                    text = { Text("Substract Ingredient based on this recipe?") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showSecondDialog = false
+
+                            Toast.makeText(context, "Ingredient Substracted!", Toast.LENGTH_SHORT).show()
+                        }) {
+                            Text("Substract")
+                        }
+
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDialog = false }) {
+                            Text("Cancel")
+                        }
+                    },
                 )
             }
 
