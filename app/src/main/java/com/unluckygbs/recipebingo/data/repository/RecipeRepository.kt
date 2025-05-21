@@ -5,12 +5,16 @@ import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.google.firebase.firestore.toObjects
 import com.unluckygbs.recipebingo.data.dao.DailyEatsDao
 import com.unluckygbs.recipebingo.data.dao.RecipeDao
 import com.unluckygbs.recipebingo.data.dataclass.Recipe
+import com.unluckygbs.recipebingo.data.dataclass.RecipeFS
 import com.unluckygbs.recipebingo.data.entity.DailyEatsWithRecipes
+import com.unluckygbs.recipebingo.data.entity.IngredientEntity
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
 import com.unluckygbs.recipebingo.data.toDailyEatsFS
+import com.unluckygbs.recipebingo.data.toRecipeEntity
 import com.unluckygbs.recipebingo.data.toRecipeFS
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
@@ -128,6 +132,40 @@ class RecipeRepository(
             } else null
         } else {
             null
+        }
+    }
+
+    suspend fun syncBookmarkedFromFirestore() {
+        try {
+            val recipeRef = firestore.collection("recipes")
+            val userDoc = firestore
+                .collection("users")
+                .document(userId)
+                .get()
+                .await()
+
+            if (!userDoc.exists()) return
+
+            val bookmarkedIDs = userDoc.get("bookmarkedRecipeIDs") as? List<*>
+
+            if (bookmarkedIDs.isNullOrEmpty()) return
+
+            bookmarkedIDs.chunked(10).forEach { batchID ->
+                val doc = recipeRef
+                    .whereIn("id", batchID)
+                    .get()
+                    .await()
+
+                val recipeFS = doc.documents.mapNotNull {
+                    it.toObject(RecipeFS::class.java)
+                }
+
+                recipeFS.forEach{ recipe ->
+                    dao.insertRecipe(recipe.toRecipeEntity(true))
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("Sync", "Error sync from Firestore: ${e.message}")
         }
     }
 }

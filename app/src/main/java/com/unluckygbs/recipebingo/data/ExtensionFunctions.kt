@@ -7,6 +7,7 @@ import com.unluckygbs.recipebingo.data.dataclass.RecipeById
 import com.unluckygbs.recipebingo.data.dataclass.RecipeFS
 import com.unluckygbs.recipebingo.data.dataclass.RecipeIngredient
 import com.unluckygbs.recipebingo.data.dataclass.RecipesID
+import com.unluckygbs.recipebingo.data.entity.DailyEatsEntity
 import com.unluckygbs.recipebingo.data.entity.DailyEatsWithRecipes
 import com.unluckygbs.recipebingo.data.entity.DailyRecipeCrossRef
 import com.unluckygbs.recipebingo.data.entity.IngredientEntity
@@ -68,3 +69,43 @@ fun RecipeEntity.toRecipeFS(): RecipeFS {
         nutrition = this.nutrition
     )
 }
+
+fun RecipeFS.toRecipeEntity(bookmark: Boolean): RecipeEntity {
+    return RecipeEntity(
+        id = this.id,
+        image = this.image,
+        title = this.name,
+        isBookmarked = bookmark,
+        extendedIngredient = this.extendedIngredient,
+        analyzedInstruction = this.analyzedInstruction,
+        nutrition = this.nutrition
+    )
+}
+
+fun DailyEatsFS.toDailyEatsEntity(): DailyEatsEntity {
+    return DailyEatsEntity(
+        date = this.date,
+        totalNutrition = this.totalNutrition
+    )
+}
+
+fun RecipesID.toCrossRef(date: String): DailyRecipeCrossRef {
+    return DailyRecipeCrossRef(
+        date = date,
+        id = this.id,
+        amount = this.amount
+    )
+}
+
+fun List<RecipesID>.toDailyRecipeCrossRefList(date: String): List<DailyRecipeCrossRef> {
+    return this.map { recipeId ->
+        recipeId.toCrossRef(date)
+    }
+}
+
+fun DailyEatsFS.toDailyRecipeCrossRefs(): List<DailyRecipeCrossRef> {
+    return this.recipesID.toDailyRecipeCrossRefList(this.date)
+}
+
+
+fun List<DailyRecipeCrossRef>.extractIds(): List<Int> = this.map { it.id }

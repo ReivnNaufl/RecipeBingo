@@ -78,7 +78,8 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
         userId = authViewModel.getCurrentUserUid() ?: ""
     )
     val dailyEatsRepository = DailyEatsRepository(
-        dao = AppDatabase.getDatabase(context).dailyEatsDao(),
+        dailyEatsDao = AppDatabase.getDatabase(context).dailyEatsDao(),
+        recipeDao = AppDatabase.getDatabase(context).recipeDao(),
         firestore = firestore,
         userId = authViewModel.getCurrentUserUid() ?: ""
     )
