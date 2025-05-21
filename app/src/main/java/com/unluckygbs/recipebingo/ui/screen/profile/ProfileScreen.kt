@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
@@ -195,8 +196,33 @@ fun ProfileContent(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                var showDialog by remember { mutableStateOf(false) }
+
+                if (showDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showDialog = false },
+                        title = { androidx.compose.material.Text("Logout") },
+                        text = { androidx.compose.material.Text("Do you want to logout?") },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                showDialog = false
+                                onLogoutClick()  // pastikan fungsi ini dipanggil
+                            }) {
+                                Text("Yes")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = {
+                                showDialog = false
+                            }) {
+                                Text("No")
+                            }
+                        }
+                    )
+                }
+
                 Button(
-                    onClick = onLogoutClick,
+                    onClick = {showDialog = true},
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEC0F24)),
                     shape = RoundedCornerShape(24.dp)
                 ) {
