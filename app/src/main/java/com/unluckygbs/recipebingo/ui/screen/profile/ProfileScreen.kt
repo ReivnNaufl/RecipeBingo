@@ -70,6 +70,12 @@ fun ProfileScreen(
     var email by remember { mutableStateOf("No Email") }
     var photoUrl by remember { mutableStateOf<String?>(null) }
 
+    LaunchedEffect(authState.value) {
+        if (authState.value is AuthState.unAuthenticated) {
+            navController.navigate("login")
+        }
+    }
+
     LaunchedEffect(userId) {
         userId?.let {
             FirebaseFirestore.getInstance()
@@ -174,6 +180,18 @@ fun ProfileContent(
                     Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Edit Profile", color = Color.White)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Button(
+                    onClick = onLogoutClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEC0F24)),
+                    shape = RoundedCornerShape(24.dp)
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = "Logout", tint = Color.White)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Logout", color = Color.White)
                 }
             }
         }

@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
@@ -51,6 +52,7 @@ import com.unluckygbs.recipebingo.ui.screen.ingredient.SearchIngredientScreen
 import com.unluckygbs.recipebingo.ui.screen.home.HomeScreen
 import com.unluckygbs.recipebingo.ui.screen.ingredient.IngredientScreen
 import com.unluckygbs.recipebingo.ui.screen.auth.LoginScreen
+import com.unluckygbs.recipebingo.ui.screen.auth.OTPAuthScreen
 import com.unluckygbs.recipebingo.ui.screen.tracker.NutritionTrackerScreen
 import com.unluckygbs.recipebingo.ui.screen.profile.ProfileScreen
 import com.unluckygbs.recipebingo.ui.screen.auth.RegisterScreen
