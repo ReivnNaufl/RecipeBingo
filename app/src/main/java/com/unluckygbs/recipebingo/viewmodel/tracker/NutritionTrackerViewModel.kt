@@ -40,6 +40,10 @@ class NutritionTrackerViewModel(
         dailyEatsRepository.deleteDailyEats(dailyEatsEntity)
     }
 
-
+    fun clearAll() {
+        viewModelScope.launch {
+            dailyEatsRepository.clearAll()
+        }
+    }
 
 }

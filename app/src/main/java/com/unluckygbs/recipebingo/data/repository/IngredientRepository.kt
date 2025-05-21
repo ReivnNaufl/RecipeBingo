@@ -32,10 +32,9 @@ class IngredientRepository(
                 it.toObject(IngredientEntity::class.java)
             }
 
-            dao.clearAll()
             dao.insertAll(ingredients)
         } catch (e: Exception) {
-            Log.e("Sync", "Error sync from Firestore: ${e.message}")
+            Log.e("IngredientsSync", "Error sync from Firestore: ${e.message}")
         }
     }
 

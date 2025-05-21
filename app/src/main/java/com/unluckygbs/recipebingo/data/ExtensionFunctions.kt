@@ -108,4 +108,4 @@ fun DailyEatsFS.toDailyRecipeCrossRefs(): List<DailyRecipeCrossRef> {
 }
 
 
-fun List<DailyRecipeCrossRef>.extractIds(): List<Int> = this.map { it.id }
+fun List<DailyRecipeCrossRef>.extractIds(): List<String> = this.map { it.id.toString() }

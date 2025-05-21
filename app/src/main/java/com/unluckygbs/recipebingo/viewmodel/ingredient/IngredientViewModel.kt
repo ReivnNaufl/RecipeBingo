@@ -82,5 +82,11 @@ class IngredientViewModel(private val ingredientRepository: IngredientRepository
     fun clearError() {
         _errorMessage.value = null
     }
+
+    fun clearAll() {
+        viewModelScope.launch {
+            ingredientRepository.clearAll()
+        }
+    }
 }
 

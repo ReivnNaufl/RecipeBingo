@@ -165,7 +165,7 @@ class RecipeRepository(
                 }
             }
         } catch (e: Exception) {
-            Log.e("Sync", "Error sync from Firestore: ${e.message}")
+            Log.e("BookmarkSync", "Error sync from Firestore: ${e.message}")
         }
     }
 }
