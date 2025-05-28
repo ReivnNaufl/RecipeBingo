@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.unluckygbs.recipebingo.ui.screen.ingredient.AvailableIngredientsScreen
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
@@ -150,11 +148,6 @@ fun HomeDetail(
                         Icon(Icons.Default.AccountCircle, contentDescription = "Profile")
                     }
                 },
-                actions = {
-                    IconButton(onClick = { /* Bookmark click */ }) {
-                        Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Bookmark")
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
@@ -227,7 +220,6 @@ fun HomeDetail(
                     }
                 }
 
-                // Today's Nutrition
                 item {
                     SectionTitle(title = "Today's Nutrition")
                     Box(
@@ -259,7 +251,6 @@ fun SectionTitle(title: String) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = title, style = MaterialTheme.typography.titleMedium)
-        Icon(Icons.Default.KeyboardArrowDown, contentDescription = null)
     }
 }
 

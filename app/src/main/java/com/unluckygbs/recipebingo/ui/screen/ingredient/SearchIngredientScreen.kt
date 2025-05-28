@@ -60,23 +60,7 @@ fun SearchIngredientScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Stock Ingredient") },
-                navigationIcon = {
-                    IconButton(onClick = { /* Profile click */ }) {
-                        Icon(Icons.Default.AccountCircle, contentDescription = "Profile")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /* Bookmark */ }) {
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = "Bookmark")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    Scaffold() { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)

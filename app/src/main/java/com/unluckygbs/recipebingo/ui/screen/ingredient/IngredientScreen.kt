@@ -99,11 +99,6 @@ fun AvailableIngredientsScreen(
                         Icon(Icons.Default.AccountCircle, contentDescription = "Profile")
                     }
                 },
-                actions = {
-                    IconButton(onClick = { /* TODO: Handle bookmark click */ }) {
-                        Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Bookmark")
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )

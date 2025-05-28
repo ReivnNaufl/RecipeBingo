@@ -90,8 +90,8 @@ class IngredientRepository(
 
     suspend fun getIncludeIngredientsQuery(): String {
         return dao.getAllOnce()
-            .map { it.name.trim().lowercase().replace(" ", "%20") } // encode spasi
-            .joinToString(",") // tidak perlu `+`
+            .map { it.name.trim().replace(" ", "+") } // handle spasi ke +
+            .joinToString(",") { "+$it" }
     }
 
     val allIngredients = dao.getAllIngredients()

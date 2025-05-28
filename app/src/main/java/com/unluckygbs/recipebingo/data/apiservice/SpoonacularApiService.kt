@@ -4,7 +4,6 @@ import com.unluckygbs.recipebingo.data.dataclass.ConversionResult
 import com.unluckygbs.recipebingo.data.dataclass.RandomRecipeResponse
 import com.unluckygbs.recipebingo.data.dataclass.Recipe
 import com.unluckygbs.recipebingo.data.dataclass.RecipeById
-import com.unluckygbs.recipebingo.data.dataclass.RecipeByIngredients
 import com.unluckygbs.recipebingo.data.dataclass.SpoonacularApiResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -51,10 +50,17 @@ interface SpoonacularApiService {
         @Query("includeNutrition") includeNutrition: Boolean = true
     ): RecipeById
 
-    @GET("recipes/complexSearch")
+    @GET("recipes/findByIngredients")
     suspend fun findRecipesByIngredients(
         @Query("apiKey") apiKey: String,
-        @Query("includeIngredients") ingredients: String,
+        @Query("ingredients") ingredients: String,
+        @Query("number") number: Int = 3,
+        @Query("metaInformation") metaInformation: Boolean = true
+        ): List<Recipe> = emptyList()
+
+    @GET("recipes/findByNutrients")
+    suspend fun findRecipesByNutrients(
+        @Query("apiKey") apiKey: String,
         @Query("minCalories") minCalories: Int? = null,
         @Query("maxCalories") maxCalories: Int? = null,
         @Query("minProtein") minProtein: Int? = null,
@@ -65,15 +71,15 @@ interface SpoonacularApiService {
         @Query("maxFat") maxFat: Int? = null,
         @Query("number") number: Int = 3,
         @Query("metaInformation") metaInformation: Boolean = true
-        ): RecipeByIngredients
+        ): List<Recipe> = emptyList()
 
-    @GET("recipes/complexSearch")
+    @GET("recipes/findByIngredients")
     suspend fun findDailyRecipes(
         @Query("apiKey") apiKey: String,
-        @Query("includeIngredients") ingredients: String,
+        @Query("ingredients") ingredients: String,
         @Query("number") number: Int = 10,
         @Query("metaInformation") metaInformation: Boolean = true
-        ): RecipeByIngredients
+        ): List<Recipe> = emptyList()
 
     @GET("recipes/convert")
     suspend fun convertIngredientAmount(
