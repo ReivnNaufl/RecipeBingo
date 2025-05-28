@@ -36,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -134,12 +135,12 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, aut
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 val image = if (passwordVisible)
-                    Icons.Default.Info
+                    painterResource(R.drawable.clarity_eye_hide_line)
                 else
-                    Icons.Default.Info
+                    painterResource(R.drawable.clarity_eye_show_line)
 
                 IconButton(onClick = { passwordVisible = !passwordVisible }){
-                    Icon(imageVector = image, contentDescription = if (passwordVisible) "Hide password" else "Show password")
+                    Icon(painter = image, contentDescription = if (passwordVisible) "Hide password" else "Show password")
                 }
             }
         )

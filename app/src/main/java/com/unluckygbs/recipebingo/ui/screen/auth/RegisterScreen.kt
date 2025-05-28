@@ -27,11 +27,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.navigation.NavController
+import com.unluckygbs.recipebingo.R
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 
@@ -113,12 +115,12 @@ fun RegisterScreen(modifier: Modifier = Modifier, navController: NavController, 
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 val image = if (passwordVisible)
-                    Icons.Default.Info
+                    painterResource(R.drawable.clarity_eye_hide_line)
                 else
-                    Icons.Default.Info
+                    painterResource(R.drawable.clarity_eye_show_line)
 
                 IconButton(onClick = { passwordVisible = !passwordVisible }){
-                    Icon(imageVector = image, contentDescription = if (passwordVisible) "Hide password" else "Show password")
+                    Icon(painter = image, contentDescription = if (passwordVisible) "Hide password" else "Show password")
                 }
             }
         )

@@ -35,6 +35,8 @@ import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
 import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.painterResource
+import com.unluckygbs.recipebingo.R
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 
 @Composable
@@ -179,7 +181,7 @@ fun RecipeDetailScreenContent(
                         }
                         isTranslated = !isTranslated
                     }) {
-                        Icon(Icons.Default.Info, contentDescription = "Translate")
+                        Icon(painter = painterResource(R.drawable.material_symbols_translate), contentDescription = "Translate")
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(if (isTranslated) "Tampilkan Asli" else "Terjemahkan")
                     }
