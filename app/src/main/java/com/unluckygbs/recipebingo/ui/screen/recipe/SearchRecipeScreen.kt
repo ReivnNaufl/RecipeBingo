@@ -61,6 +61,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -70,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.unluckygbs.recipebingo.R
 import com.unluckygbs.recipebingo.data.dataclass.Recipe
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
@@ -149,7 +151,7 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                 },
                 actions = {
                     IconButton(onClick = { navController.navigate("bookmarkedrecipe") }) {
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = "Bookmark")
+                        Icon(painter = painterResource(R.drawable.material_symbols_bookmark_outline), contentDescription = "Bookmark")
                     }
                 }
             )

@@ -33,6 +33,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlin.math.round
 
 @Composable
 fun NutritionTrackerScreen(
@@ -168,7 +169,7 @@ fun NutritionTracker(
             } else {
                 nutrients.forEach { nutrient ->
                     if (nutrient.name != "Calories") {
-                        Text("${nutrient.amount} ${nutrient.unit} of ${nutrient.name}")
+                        Text(String.format("%.2f %s of %s", nutrient.amount, nutrient.unit, nutrient.name))
                     }
                 }
             }
