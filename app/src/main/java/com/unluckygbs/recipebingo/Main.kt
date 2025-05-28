@@ -1,5 +1,6 @@
 package com.unluckygbs.recipebingo
 
+
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +35,8 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -70,6 +73,7 @@ import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
 import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModelFactory
 import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModel
 import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModelFactory
+import com.unluckygbs.recipebingo.R
 
 @Composable
 fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Context, startDestination: String, onOnboardingFinished: () -> Unit) {
@@ -170,11 +174,11 @@ fun App(
     nutritionTrackerViewModel: NutritionTrackerViewModel
 ) {
     val navItemList = listOf(
-        NavItem("Home", Icons.Default.Home),
-        NavItem("Search", Icons.Default.Search),
-        NavItem("Stock", Icons.Default.Add),
-        NavItem("Track", Icons.Default.Check),
-        NavItem("Profile", Icons.Default.AccountCircle)
+        NavItem("Home", NavIcon.Drawable(R.drawable.home)),
+        NavItem("Search", NavIcon.Drawable(R.drawable.search)),
+        NavItem("Stock", NavIcon.Drawable(R.drawable.stock)),
+        NavItem("Track", NavIcon.Drawable(R.drawable.dailyeats)),
+        NavItem("Profile", NavIcon.Drawable(R.drawable.profile))
     )
 
     val selectedIndex by mainViewModel.selectedIndex
@@ -210,12 +214,7 @@ fun App(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.Center
                                     ) {
-                                        Icon(
-                                            imageVector = navItem.icon,
-                                            contentDescription = navItem.label,
-                                            tint = Color.White,
-                                            modifier = Modifier.size(24.dp) // Ikon lebih besar untuk item yang dipilih
-                                        )
+                                        NavIconView(navItem.icon, navItem.label, 24.dp, Color.White)
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
                                             text = navItem.label,
@@ -226,12 +225,7 @@ fun App(
                                     }
                                 }
                             } else {
-                                Icon(
-                                    imageVector = navItem.icon,
-                                    contentDescription = navItem.label,
-                                    tint = Color.Gray,
-                                    modifier = Modifier.size(18.dp) // Ikon lebih kecil untuk item yang tidak dipilih
-                                )
+                                NavIconView(navItem.icon, navItem.label, 18.dp, Color.Gray)
                             }
                         },
                         label = { /* Kosongkan label bawaan, kita atur di icon */ },
@@ -261,6 +255,25 @@ fun App(
         )
     }
 }
+
+@Composable
+fun NavIconView(icon: NavIcon, contentDescription: String, size: Dp, tint: Color) {
+    when (icon) {
+        is NavIcon.Vector -> Icon(
+            imageVector = icon.image,
+            contentDescription = contentDescription,
+            tint = tint,
+            modifier = Modifier.size(size)
+        )
+        is NavIcon.Drawable -> Icon(
+            painter = painterResource(id = icon.resId),
+            contentDescription = contentDescription,
+            tint = tint,
+            modifier = Modifier.size(size)
+        )
+    }
+}
+
 
 @Composable
 fun ContentScreen(
