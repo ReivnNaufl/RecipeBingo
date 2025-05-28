@@ -2,6 +2,8 @@ package com.unluckygbs.recipebingo.viewmodel.recipe
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -20,18 +22,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import androidx.compose.runtime.State
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class RecipeViewModel(
     private val recipeRepository: RecipeRepository,
     private val ingredientRepository: IngredientRepository
 ) : ViewModel() {
-    sealed class SubtractionResult {
-        data object Success : SubtractionResult()
-        data class Error(val message: String) : SubtractionResult()
-    }
-
-    private val _result = MutableStateFlow<SubtractionResult?>(null)
-    val subtractionResult: StateFlow<SubtractionResult?> = _result.asStateFlow()
+    private val _subtractionMessage = MutableStateFlow<String?>(null)
+    val subtractionMessage: StateFlow<String?> = _subtractionMessage.asStateFlow()
 
     private val _recipe = MutableLiveData<List<Recipe>>(emptyList())
     val recipe: LiveData<List<Recipe>> = _recipe
@@ -168,7 +168,7 @@ class RecipeViewModel(
         }
     }
 
-    fun fetchRecipeByAvailableIngredientswithNutrition(nutrients: Map<String, Int>) {
+    fun fetchRecipeByAvailableIngredients() {
         viewModelScope.launch {
             _loading.value = true
             _errorMessage.value = null
@@ -181,17 +181,9 @@ class RecipeViewModel(
                 val response = SpoonacularClient.apiService.findRecipesByIngredients(
                     apiKey = apiKey,
                     ingredients = ingredients,
-                    minCalories = nutrients["minCalories"],
-                    maxCalories = nutrients["maxCalories"],
-                    minProtein = nutrients["minProtein"],
-                    maxProtein = nutrients["maxProtein"],
-                    minSugar = nutrients["minSugar"],
-                    maxSugar = nutrients["maxSugar"],
-                    minFat = nutrients["minFat"],
-                    maxFat = nutrients["maxFat"]
                 )
 
-                _recipe.value = response.results
+                _recipe.value = response
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to fetch recipes."
             } finally {
@@ -200,7 +192,7 @@ class RecipeViewModel(
         }
     }
 
-    fun fetchRecipeByNutritionOnly(nutrients: Map<String, Int>) {
+    fun fetchRecipeByNutrition(nutrients: Map<String, Int>) {
         viewModelScope.launch {
             _loading.value = true
             _errorMessage.value = null
@@ -209,9 +201,8 @@ class RecipeViewModel(
             try {
                 val apiKey = KeyClient.apiService.getapikey().key
 
-                val response = SpoonacularClient.apiService.findRecipesByIngredients(
+                val response = SpoonacularClient.apiService.findRecipesByNutrients(
                     apiKey = apiKey,
-                    ingredients = "",
                     minCalories = nutrients["minCalories"],
                     maxCalories = nutrients["maxCalories"],
                     minProtein = nutrients["minProtein"],
@@ -222,7 +213,7 @@ class RecipeViewModel(
                     maxFat = nutrients["maxFat"]
                 )
 
-                _recommendedRecipes.value = response.results
+                _recommendedRecipes.value = response
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to fetch recipes by nutrition."
             } finally {
@@ -252,7 +243,7 @@ class RecipeViewModel(
                     ingredients = ingredients
                 )
 
-                val shuffled = response.results.shuffled().take(3)
+                val shuffled = response.shuffled().take(3)
                 _dailyRecipes.value = shuffled
                 recipeRepository.saveShuffledDailyRecipes(context, shuffled)
 
@@ -343,12 +334,12 @@ class RecipeViewModel(
     }
 
     fun subtractIngredients(recipeIngredients: List<RecipeIngredient>) {
-        viewModelScope.launch {
-            _result.value = try {
-                ingredientRepository.subtractIngredient(recipeIngredients)
-                SubtractionResult.Success
+        viewModelScope.launch(Dispatchers.IO) {  // Run in background thread
+            try {
+                val message = ingredientRepository.subtractIngredient(recipeIngredients)
+                _subtractionMessage.emit(message)  // Update StateFlow
             } catch (e: Exception) {
-                SubtractionResult.Error(e.message ?: "Unknown error")
+                _subtractionMessage.emit(e.message ?: "Unknown error")
             }
         }
     }
@@ -372,4 +363,9 @@ class RecipeViewModel(
             recipeRepository.deleteAll()
         }
     }
+
+    fun clearSubtractMsg(){
+        _subtractionMessage.value = null
+    }
 }
+
