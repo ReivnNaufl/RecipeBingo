@@ -1,6 +1,7 @@
 package com.unluckygbs.recipebingo.ui.screen.tracker
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -57,7 +58,7 @@ fun NutritionTrackerScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        NutritionTracker(nutritionTrackerViewModel)
+        NutritionTracker(nutritionTrackerViewModel,navController)
 
         TextButton(onClick = {
             authViewModel.signout(context)
@@ -70,7 +71,8 @@ fun NutritionTrackerScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NutritionTracker(
-    nutritionTrackerViewModel: NutritionTrackerViewModel
+    nutritionTrackerViewModel: NutritionTrackerViewModel,
+    navController: NavController
 ) {
     val datePickerState = rememberDatePickerState()
     val selectedDate = datePickerState.selectedDateMillis?.let {
@@ -120,10 +122,14 @@ fun NutritionTracker(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clickable{navController.navigate("detailedrecipe/${food.id}")}
                         .padding(vertical = 4.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFEFEFEF))
                 ) {
-                    Row(modifier = Modifier.padding(8.dp)) {
+                    Row(modifier = Modifier
+                        .padding(8.dp)
+
+                    ) {
                         AsyncImage(
                             model = food.image,
                             contentDescription = food.title,

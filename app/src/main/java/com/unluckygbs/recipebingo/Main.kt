@@ -2,6 +2,19 @@ package com.unluckygbs.recipebingo
 
 
 import android.content.Context
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.with
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +26,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,9 +47,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -74,6 +92,8 @@ import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModelFactory
 import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModel
 import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModelFactory
 import com.unluckygbs.recipebingo.R
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Context, startDestination: String, onOnboardingFinished: () -> Unit) {
@@ -163,6 +183,7 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
     })
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun App(
     modifier: Modifier = Modifier,
@@ -182,79 +203,146 @@ fun App(
     )
 
     val selectedIndex by mainViewModel.selectedIndex
+    val pagerState = rememberPagerState(
+        initialPage = selectedIndex,
+        pageCount = { navItemList.size }
+    )
+
+    val scope = rememberCoroutineScope()
+
+    // Sinkronisasi swipe -> ViewModel
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collectLatest {
+            if (mainViewModel.selectedIndex.value != it) {
+                mainViewModel.setSelectedIndex(it)
+            }
+        }
+    }
+
+    // Sinkronisasi ViewModel -> swipe
+    LaunchedEffect(selectedIndex) {
+        if (pagerState.currentPage != selectedIndex) {
+            pagerState.animateScrollToPage(selectedIndex)
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar(
-                containerColor = Color(0xFFF5F5F5), // Latar belakang abu-abu muda
-                contentColor = Color.Black,
-                modifier = Modifier
-                    .padding(horizontal = 4.dp)
-                    .background(
-                        color = Color(0xFFF5F5F5),
-                        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 0.dp, bottomStart = 16.dp, bottomEnd = 0.dp)
-                    )
+                containerColor = Color(0xFFF5F5F5),
+                contentColor = Color.Black
             ) {
                 navItemList.forEachIndexed { index, navItem ->
+                    val isSelected = selectedIndex == index
+
+                    val backgroundColor by animateColorAsState(
+                        targetValue = if (isSelected) Color(0xFF00C853) else Color.Transparent,
+                        animationSpec = tween(durationMillis = 300)
+                    )
+
+                    val scale by animateFloatAsState(
+                        targetValue = if (isSelected) 1.2f else 1f,
+                        animationSpec = tween(durationMillis = 300)
+                    )
+
                     NavigationBarItem(
-                        selected = selectedIndex == index,
-                        onClick = { mainViewModel.setSelectedIndex(index) },
+                        selected = isSelected,
+                        onClick = {
+                            mainViewModel.setSelectedIndex(index)
+                            scope.launch { pagerState.animateScrollToPage(index) }
+                        },
                         icon = {
-                            if (selectedIndex == index) {
-                                Box(
-                                    modifier = Modifier
-                                        .background(
-                                            color = Color(0xFF00C853),
-                                            shape = CircleShape
-                                        )
-                                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                            Box(
+                                modifier = Modifier
+                                    .graphicsLayer { scaleX = scale; scaleY = scale }
+                                    .background(backgroundColor, shape = CircleShape)
+                                    .padding(horizontal = if (isSelected) 12.dp else 0.dp, vertical = 6.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
                                 ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        NavIconView(navItem.icon, navItem.label, 24.dp, Color.White)
+                                    NavIconView(navItem.icon, navItem.label, if (isSelected) 24.dp else 18.dp, if (isSelected) Color.White else Color.Gray)
+                                    AnimatedVisibility(visible = isSelected) {
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
                                             text = navItem.label,
                                             color = Color.White,
-                                            fontSize = 12.sp,
-                                            modifier = Modifier.wrapContentWidth()
+                                            fontSize = 12.sp
                                         )
                                     }
                                 }
-                            } else {
-                                NavIconView(navItem.icon, navItem.label, 18.dp, Color.Gray)
                             }
                         },
-                        label = { /* Kosongkan label bawaan, kita atur di icon */ },
+                        label = {},
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color(0xFF00C853),
+                            selectedIconColor = Color.Transparent,
                             unselectedIconColor = Color.Gray,
-                            selectedTextColor = Color(0xFF00C853),
-                            unselectedTextColor = Color.Gray,
                             indicatorColor = Color.Transparent
                         ),
                         modifier = Modifier
-                            .weight(if (selectedIndex == index) 1.5f else 1f)
-                            .widthIn(min = if (selectedIndex == index) 120.dp else 40.dp) // Tingkatkan lebar minimum untuk item yang dipilih
+                            .weight(if (isSelected) 1.5f else 1f)
+                            .widthIn(min = if (isSelected) 100.dp else 40.dp)
                     )
                 }
             }
         }
     ) { innerPadding ->
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.padding(innerPadding)
+        ) { page ->
+            ContentScreen(
+                selectedIndex = page,
+                navController = navController,
+                authViewModel = authViewModel,
+                ingredientViewModel = ingredientViewModel,
+                recipeViewModel = recipeViewModel,
+                nutritionTrackerViewModel = nutritionTrackerViewModel
+            )
+        }
+    }
+}
+
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun AnimatedTabContent(
+    selectedIndex: Int,
+    navController: NavController,
+    authViewModel: AuthViewModel,
+    ingredientViewModel: IngredientViewModel,
+    recipeViewModel: RecipeViewModel,
+    nutritionTrackerViewModel: NutritionTrackerViewModel,
+    modifier: Modifier = Modifier
+) {
+    AnimatedContent(
+        targetState = selectedIndex,
+        transitionSpec = {
+            if (targetState > initialState) {
+                slideInHorizontally { fullWidth -> fullWidth } + fadeIn() with
+                        slideOutHorizontally { fullWidth -> -fullWidth } + fadeOut()
+            } else {
+                slideInHorizontally { fullWidth -> -fullWidth } + fadeIn() with
+                        slideOutHorizontally { fullWidth -> fullWidth } + fadeOut()
+            }
+        },
+        label = "TabContentTransition",
+        modifier = modifier
+    ) { targetIndex ->
         ContentScreen(
-            modifier = Modifier.padding(innerPadding),
+            selectedIndex = targetIndex,
             navController = navController,
             authViewModel = authViewModel,
-            selectedIndex = selectedIndex,
             ingredientViewModel = ingredientViewModel,
             recipeViewModel = recipeViewModel,
             nutritionTrackerViewModel = nutritionTrackerViewModel
         )
     }
 }
+
+
 
 @Composable
 fun NavIconView(icon: NavIcon, contentDescription: String, size: Dp, tint: Color) {
