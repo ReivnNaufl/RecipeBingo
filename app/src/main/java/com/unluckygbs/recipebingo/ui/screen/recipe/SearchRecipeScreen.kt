@@ -142,11 +142,6 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
         topBar = {
             TopAppBar(
                 title = { Text("Search Recipe") },
-                navigationIcon = {
-                    IconButton(onClick = { /* Profile click */ }) {
-                        Icon(Icons.Default.AccountCircle, contentDescription = "Profile")
-                    }
-                },
                 actions = {
                     IconButton(onClick = { navController.navigate("bookmarkedrecipe") }) {
                         Icon(painter = painterResource(R.drawable.material_symbols_bookmark_outline), contentDescription = "Bookmark")

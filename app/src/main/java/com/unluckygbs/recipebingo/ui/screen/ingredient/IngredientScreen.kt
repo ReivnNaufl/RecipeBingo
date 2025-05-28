@@ -94,11 +94,6 @@ fun AvailableIngredientsScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Available Ingredients") },
-                navigationIcon = {
-                    IconButton(onClick = { /* TODO: Handle profile click */ }) {
-                        Icon(Icons.Default.AccountCircle, contentDescription = "Profile")
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )

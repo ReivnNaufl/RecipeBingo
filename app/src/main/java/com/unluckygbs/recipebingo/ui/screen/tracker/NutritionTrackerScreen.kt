@@ -3,6 +3,7 @@ package com.unluckygbs.recipebingo.ui.screen.tracker
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,6 +36,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.round
+import androidx.compose.foundation.lazy.items
 
 @Composable
 fun NutritionTrackerScreen(
@@ -88,18 +90,23 @@ fun NutritionTracker(
     val totalCalories = calorie?.amount?.toFloat() ?: 0
 
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
-        // Title
-        Text("Track Nutrition", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Calendar shown directly
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Daily Eats") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             elevation = CardDefaults.cardElevation()
@@ -118,40 +125,29 @@ fun NutritionTracker(
         if (eatenRecipe.isNullOrEmpty()) {
             Text("No foods logged.")
         } else {
-            eatenRecipe.forEach { food ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable{navController.navigate("detailedrecipe/${food.id}")}
-                        .padding(vertical = 4.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFEFEFEF))
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFEFEFEF))
+            ) {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
                 ) {
-                    Row(modifier = Modifier
-                        .padding(8.dp)
-
-                    ) {
-                        AsyncImage(
-                            model = food.image,
-                            contentDescription = food.title,
-                            modifier = Modifier
-                                .size(80.dp)
-                                .clip(RoundedCornerShape(8.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.CenterVertically)
+                    items(eatenRecipe) { food ->
+                        RectangleRecipeItem(
+                            rank = food.title,
+                            imageUrl = food.image
                         ) {
-                            Text(food.title, fontWeight = FontWeight.Bold)
-                            // Tambahkan teks lainnya jika perlu
+                            navController.navigate("detailedrecipe/${food.id}")
                         }
                     }
                 }
             }
 
-        Spacer(modifier = Modifier.height(16.dp))
+
+            Spacer(modifier = Modifier.height(16.dp))
 
         // Nutrients Summary
         Text("Nutrients", fontWeight = FontWeight.Bold)
@@ -181,4 +177,30 @@ fun NutritionTracker(
             }
         }
     }
-}}
+}}}
+
+@Composable
+fun RectangleRecipeItem(rank: String, imageUrl: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .width(200.dp)
+            .height(120.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onClick() }
+    ) {
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = rank,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+        Text(
+            text = rank,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(8.dp),
+            style = MaterialTheme.typography.labelMedium,
+            color = Color.White
+        )
+    }
+}

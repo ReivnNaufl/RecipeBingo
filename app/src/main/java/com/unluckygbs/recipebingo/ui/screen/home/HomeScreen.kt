@@ -143,11 +143,6 @@ fun HomeDetail(
         topBar = {
             TopAppBar(
                 title = { Text("Available Ingredients") },
-                navigationIcon = {
-                    IconButton(onClick = { /* Profile click */ }) {
-                        Icon(Icons.Default.AccountCircle, contentDescription = "Profile")
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
