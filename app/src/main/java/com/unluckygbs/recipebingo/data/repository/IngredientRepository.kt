@@ -158,7 +158,7 @@ class IngredientRepository(
         return Pair(true, "Inventory subtraction is successful")
     }
 
-    suspend fun subtractIngredient(recipeIngredients: List<RecipeIngredient>): Pair<Boolean, String> {
+    suspend fun subtractIngredient(recipeIngredients: List<RecipeIngredient>): String {
         val inventory = dao.getAllAsList()
         val inventoryChanges = mutableListOf<IngredientEntity>()
 
@@ -167,7 +167,7 @@ class IngredientRepository(
             inventory.any { it.name == recipeIngredient.name }
         }
         if (missingIngredients.isNotEmpty()) {
-            return Pair(false, "Missing ingredients: ${missingIngredients.joinToString { it.name }}")
+            return "Missing ingredients: ${missingIngredients.joinToString { it.name }}"
         }
 
         for (recipeIngredient in recipeIngredients) {
@@ -191,20 +191,20 @@ class IngredientRepository(
                 }
 
                 if (inventoryIngredient.quantity < amountToSubtract) {
-                    return Pair(false, "Not enough ${recipeIngredient.name} (need $amountToSubtract ${inventoryIngredient.unit})")
+                    return "Not enough ${recipeIngredient.name} (need $amountToSubtract ${inventoryIngredient.unit})"
                 }
 
                 inventoryChanges.add(
                     inventoryIngredient.copy(quantity = inventoryIngredient.quantity - amountToSubtract)
                 )
             } catch (e: Exception) {
-                return Pair(false, "Failed to process ${recipeIngredient.name}: ${e.message}")
+                return "Failed to process ${recipeIngredient.name}: ${e.message}"
             }
         }
 
         inventoryChanges.forEach { dao.updateIngredient(it) }
 
-        return Pair(true, "Successfully subtracted ingredients")
+        return "Successfully subtracted ingredients"
     }
 }
 

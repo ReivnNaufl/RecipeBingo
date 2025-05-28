@@ -93,7 +93,6 @@ fun RecipeDetailScreenContent(
     val isTranslating by recipeViewModel.isTranslating.collectAsState()
     var isTranslated by remember { mutableStateOf(false) }
 
-
     Log.d("NUTRITION", "Nutrition: ${recipeById?.nutrition}")
 
     if (recipeById == null) {
@@ -260,7 +259,6 @@ fun RecipeDetailScreenContent(
             )
 
             var showDialog by remember { mutableStateOf(false) }
-            var showSecondDialog by remember { mutableStateOf(false) }
             if (showDialog) {
                 AlertDialog(
                     onDismissRequest = { showDialog = false },
@@ -281,7 +279,7 @@ fun RecipeDetailScreenContent(
                             recipeViewModel.updateOrInsertRecipe(insertedData, changeBookmark = false)
                             nutritionTrackerViewModel.insertRecipe(insertedData)
 
-                            showSecondDialog = true
+                            Toast.makeText(context, "Recipe Added to Daily Eats!", Toast.LENGTH_SHORT).show()
                         }) {
                             Text("Add")
                         }
@@ -291,29 +289,6 @@ fun RecipeDetailScreenContent(
                             Text("Cancel")
                         }
                     }
-                )
-            }
-
-            if (showSecondDialog) {
-                AlertDialog(
-                    onDismissRequest = { showSecondDialog = false },
-                    title = { Text("Substract Ingredient?") },
-                    text = { Text("Substract Ingredient based on this recipe?") },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            showSecondDialog = false
-
-                            Toast.makeText(context, "Ingredient Substracted!", Toast.LENGTH_SHORT).show()
-                        }) {
-                            Text("Substract")
-                        }
-
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showDialog = false }) {
-                            Text("Cancel")
-                        }
-                    },
                 )
             }
 
