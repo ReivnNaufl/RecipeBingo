@@ -1,6 +1,7 @@
 package com.unluckygbs.recipebingo.ui.screen.recipe
 
-import android.util.Log
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -8,14 +9,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,7 +29,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -60,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -94,8 +93,7 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     val openBottomSheet = remember { mutableStateOf(false) }
-
-
+    val context = LocalContext.current
 
     val _selectedFilters = remember { mutableStateOf<Set<String>>(setOf("without")) }
     val selectedFilters = _selectedFilters.value
@@ -299,7 +297,7 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                 onDismissRequest = { openBottomSheet.value = false },
                 sheetState = sheetState
             ){
-                RecipeRecommendationBottomSheet(
+                RecipeRecommendationBottomSheets(
                     selectedFilters = selectedFilters,
                     onFilterClick = ::onFilterClick,
                     onRecommendClick = {
@@ -317,14 +315,27 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                         if ("Min Fat" in selectedFilters) nutrientParams["minFat"] = 10
                         if ("Max Fat" in selectedFilters) nutrientParams["maxFat"] = 100
 
-                        if ("with" in selectedFilters) {
-                            recipeViewModel.fetchRecipeByAvailableIngredientswithNutrition(nutrientParams)
-                        } else if (nutrientParams.isNotEmpty()) {
-                            recipeViewModel.fetchRecipeByNutritionOnly(nutrientParams)
+                        val isInvalid = "with" in selectedFilters && nutrientParams.isNotEmpty()
+
+                        if (isInvalid) {
+                            Toast.makeText(
+                                context,
+                                "You cannot combine ingredient-based and nutrient-based filters.",
+                                Toast.LENGTH_LONG
+                            ).show()
                         } else {
-                            recipeViewModel.fetchRandomRecipes()
+                            if ("with" in selectedFilters) {
+                                recipeViewModel.fetchRecipeByAvailableIngredients()
+                            } else if (nutrientParams.isNotEmpty()) {
+                                recipeViewModel.fetchRecipeByNutrition(nutrientParams)
+                            } else {
+                                recipeViewModel.fetchRandomRecipes()
+                            }
+
+                            openBottomSheet.value = false
                         }
-                    }
+                    },
+                    context = context
                 )
             }
         }
@@ -382,10 +393,11 @@ fun RecommendationButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun RecipeRecommendationBottomSheet(
+fun RecipeRecommendationBottomSheets(
     selectedFilters: Set<String>,
     onFilterClick: (String) -> Unit,
-    onRecommendClick: () -> Unit
+    onRecommendClick: () -> Unit,
+    context: Context
 ) {
     Column(
         modifier = Modifier

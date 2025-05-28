@@ -168,7 +168,7 @@ class RecipeViewModel(
         }
     }
 
-    fun fetchRecipeByAvailableIngredientswithNutrition(nutrients: Map<String, Int>) {
+    fun fetchRecipeByAvailableIngredients() {
         viewModelScope.launch {
             _loading.value = true
             _errorMessage.value = null
@@ -181,17 +181,9 @@ class RecipeViewModel(
                 val response = SpoonacularClient.apiService.findRecipesByIngredients(
                     apiKey = apiKey,
                     ingredients = ingredients,
-                    minCalories = nutrients["minCalories"],
-                    maxCalories = nutrients["maxCalories"],
-                    minProtein = nutrients["minProtein"],
-                    maxProtein = nutrients["maxProtein"],
-                    minSugar = nutrients["minSugar"],
-                    maxSugar = nutrients["maxSugar"],
-                    minFat = nutrients["minFat"],
-                    maxFat = nutrients["maxFat"]
                 )
 
-                _recipe.value = response.results
+                _recipe.value = response
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to fetch recipes."
             } finally {
@@ -200,7 +192,7 @@ class RecipeViewModel(
         }
     }
 
-    fun fetchRecipeByNutritionOnly(nutrients: Map<String, Int>) {
+    fun fetchRecipeByNutrition(nutrients: Map<String, Int>) {
         viewModelScope.launch {
             _loading.value = true
             _errorMessage.value = null
@@ -209,9 +201,8 @@ class RecipeViewModel(
             try {
                 val apiKey = KeyClient.apiService.getapikey().key
 
-                val response = SpoonacularClient.apiService.findRecipesByIngredients(
+                val response = SpoonacularClient.apiService.findRecipesByNutrients(
                     apiKey = apiKey,
-                    ingredients = "",
                     minCalories = nutrients["minCalories"],
                     maxCalories = nutrients["maxCalories"],
                     minProtein = nutrients["minProtein"],
@@ -222,7 +213,7 @@ class RecipeViewModel(
                     maxFat = nutrients["maxFat"]
                 )
 
-                _recommendedRecipes.value = response.results
+                _recommendedRecipes.value = response
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to fetch recipes by nutrition."
             } finally {
@@ -252,7 +243,7 @@ class RecipeViewModel(
                     ingredients = ingredients
                 )
 
-                val shuffled = response.results.shuffled().take(3)
+                val shuffled = response.shuffled().take(3)
                 _dailyRecipes.value = shuffled
                 recipeRepository.saveShuffledDailyRecipes(context, shuffled)
 
@@ -373,3 +364,4 @@ class RecipeViewModel(
         }
     }
 }
+
