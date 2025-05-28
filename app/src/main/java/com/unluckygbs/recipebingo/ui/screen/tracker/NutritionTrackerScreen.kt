@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -14,7 +15,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -22,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthState
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModel
@@ -111,19 +115,34 @@ fun NutritionTracker(
         if (eatenRecipe.isNullOrEmpty()) {
             Text("No foods logged.")
         } else {
-            eatenRecipe.forEach() { food ->
+            eatenRecipe.forEach { food ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFEFEFEF))
                 ) {
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        Text(food.title, fontWeight = FontWeight.Bold)
+                    Row(modifier = Modifier.padding(8.dp)) {
+                        AsyncImage(
+                            model = food.image,
+                            contentDescription = food.title,
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.CenterVertically)
+                        ) {
+                            Text(food.title, fontWeight = FontWeight.Bold)
+                            // Tambahkan teks lainnya jika perlu
+                        }
                     }
                 }
             }
-        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -155,4 +174,4 @@ fun NutritionTracker(
             }
         }
     }
-}
+}}
