@@ -14,6 +14,7 @@ import com.unluckygbs.recipebingo.data.toRecipeEntity
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
 import com.unluckygbs.recipebingo.data.repository.RecipeRepository
 import com.unluckygbs.recipebingo.repository.IngredientRepository
+import com.unluckygbs.recipebingo.util.TranslatorHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -60,6 +61,18 @@ class RecipeViewModel(
     val dailyRecipes: LiveData<List<Recipe>> = _dailyRecipes
 
     private var lastUpdatedDate: LocalDate? = null
+
+    private val _isTranslating = MutableStateFlow(false)
+    val isTranslating: StateFlow<Boolean> = _isTranslating
+
+    private val _translatedIngredients = MutableLiveData<List<String>>()
+    val translatedIngredients: LiveData<List<String>> = _translatedIngredients
+
+    private val _translatedSteps = MutableLiveData<List<String>>()
+    val translatedSteps: LiveData<List<String>> = _translatedSteps
+
+    private val _translatedNutrition = MutableLiveData<List<String>>()
+    val translatedNutrition: LiveData<List<String>> = _translatedNutrition
 
 
     fun fetchRecipe(query: String) {
@@ -251,6 +264,26 @@ class RecipeViewModel(
         }
     }
 
+    fun translateRecipeDetails(
+        ingredients: List<String>,
+        steps: List<String>,
+        nutrition: List<String>
+    ) {
+        viewModelScope.launch {
+            _isTranslating.value = true
+
+            val translator = TranslatorHelper()
+            val translatedIngredients = ingredients.map { translator.translateText(it) ?: it }
+            val translatedSteps = steps.map { translator.translateText(it) ?: it }
+            val translatedNutrition = nutrition.map { translator.translateText(it) ?: it }
+
+            _translatedIngredients.value = translatedIngredients
+            _translatedSteps.value = translatedSteps
+            _translatedNutrition.value = translatedNutrition
+
+            _isTranslating.value = false
+        }
+    }
 
     fun resetState() {
         _recipe.value = emptyList()

@@ -113,4 +113,7 @@ dependencies {
     
     // Google Sign-In
     implementation("com.google.android.gms:play-services-auth:20.2.0")
+
+    implementation("com.google.mlkit:translate:17.0.1")
+
 }

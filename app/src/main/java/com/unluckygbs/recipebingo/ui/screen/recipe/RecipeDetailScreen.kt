@@ -14,12 +14,12 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,7 +30,6 @@ import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.unluckygbs.recipebingo.data.dataclass.RecipeById
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
 import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
 import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModel
@@ -84,8 +83,13 @@ fun RecipeDetailScreenContent(
     context: Context,
     ingredientViewModel: IngredientViewModel
 ) {
-    val nutrients = recipeById?.nutrition
-        ?.map { "${it.name}: ${it.amount} ${it.unit}" }
+
+    val translatedIngredients by recipeViewModel.translatedIngredients.observeAsState()
+    val translatedSteps by recipeViewModel.translatedSteps.observeAsState()
+    val translatedNutrition by recipeViewModel.translatedNutrition.observeAsState()
+
+    val isTranslating by recipeViewModel.isTranslating.collectAsState()
+    var isTranslated by remember { mutableStateOf(false) }
 
 
     Log.d("NUTRITION", "Nutrition: ${recipeById?.nutrition}")
@@ -158,25 +162,81 @@ fun RecipeDetailScreenContent(
 
             item { Divider() }
 
-            // Ingredients section
             item {
-                SectionWithDots(title = "Ingredients", items = recipeById.extendedIngredient.map { it.original })
-            }
-
-            item { Divider() }
-
-            // Steps section
-            recipeById.analyzedInstruction.flatMap { it.steps }.map { it.step }.let { steps ->
-                item {
-                    SectionWithDots(title = "Steps", items = steps)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = {
+                        if (!isTranslated) {
+                            recipeViewModel.translateRecipeDetails(
+                                ingredients = recipeById.extendedIngredient.map { it.original },
+                                steps = recipeById.analyzedInstruction.flatMap { it.steps }.map { it.step },
+                                nutrition = recipeById.nutrition.map { "${it.name}: ${it.amount} ${it.unit}" }
+                            )
+                        }
+                        isTranslated = !isTranslated
+                    }) {
+                        Icon(Icons.Default.Info, contentDescription = "Translate")
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(if (isTranslated) "Tampilkan Asli" else "Terjemahkan")
+                    }
                 }
             }
 
             item { Divider() }
 
-            nutrients?.let {
+            if (isTranslating) {
                 item {
-                        SectionWithDots(title = "Nutrition", items = it)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            } else {
+                // Ingredients section
+                item {
+                    SectionWithDots(
+                        title = "Ingredients",
+                        items = if (isTranslated)
+                            translatedIngredients ?: emptyList()
+                        else
+                            recipeById.extendedIngredient.map { it.original }
+                    )
+                }
+
+                item { Divider() }
+
+                // Steps section
+                val steps = recipeById.analyzedInstruction.flatMap { it.steps }.map { it.step }
+                item {
+                    SectionWithDots(
+                        title = "Steps",
+                        items = if (isTranslated)
+                            translatedSteps ?: emptyList()
+                        else
+                            steps
+                    )
+                }
+
+                item { Divider() }
+
+                // Nutrition section
+                val nutrients = recipeById.nutrition.map { "${it.name}: ${it.amount} ${it.unit}" }
+                item {
+                    SectionWithDots(
+                        title = "Nutrition",
+                        items = if (isTranslated)
+                            translatedNutrition ?: emptyList()
+                        else
+                            nutrients
+                    )
                 }
             }
         }
