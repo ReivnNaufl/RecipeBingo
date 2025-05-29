@@ -237,7 +237,15 @@ fun NutritionTableSection(title: String, items: List<String>) {
         items.forEachIndexed { index, item ->
             val parts = item.split(":").map { it.trim() }
             val name = parts.getOrNull(0) ?: "-"
-            val amount = parts.getOrNull(1) ?: "-"
+            val rawAmount = parts.getOrNull(1) ?: "-"
+            val amount = try {
+                val number = rawAmount.takeWhile { it.isDigit() || it == '.' }.toDouble()
+                val unit = rawAmount.dropWhile { it.isDigit() || it == '.' }.trim()
+                "%.2f".format(number) + " " + unit
+            } catch (e: Exception) {
+                rawAmount
+            }
+
 
             Row(
                 modifier = Modifier

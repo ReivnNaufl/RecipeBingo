@@ -34,6 +34,7 @@ import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
 import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModel
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.zIndex
 import com.unluckygbs.recipebingo.R
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 
@@ -103,6 +104,20 @@ fun RecipeDetailScreenContent(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
+
+        IconButton(
+            onClick = onBackClick,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .offset(y = 24.dp) // untuk geser vertikal
+                .zIndex(1f) // pastikan tampil di atas gambar
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.material_symbols_arrow_back),
+                contentDescription = "Back"
+            )
+        }
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -117,15 +132,7 @@ fun RecipeDetailScreenContent(
                         .height(220.dp)
                         .background(Color(0xFFE0E0E0))
                 ) {
-                    IconButton(
-                        onClick = onBackClick,
-                        modifier = Modifier.align(Alignment.TopStart)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.material_symbols_arrow_back),
-                            contentDescription = "Back"
-                        )
-                    }
+
 
                     if (recipeById.image.isNotEmpty()) {
                         AsyncImage(
