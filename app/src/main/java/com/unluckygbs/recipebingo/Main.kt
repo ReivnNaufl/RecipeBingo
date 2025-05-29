@@ -153,6 +153,9 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
         composable("register"){
             RegisterScreen(modifier,navController,authViewModel)
         }
+        composable("otpAuth") {
+            OTPAuthScreen(navController = navController, authViewModel = authViewModel)
+        }
         composable("home"){
             App(modifier,navController,authViewModel,ingredientViewModel, recipeViewModel, nutritionTrackerViewModel = nutritionTrackerViewModel)
         }

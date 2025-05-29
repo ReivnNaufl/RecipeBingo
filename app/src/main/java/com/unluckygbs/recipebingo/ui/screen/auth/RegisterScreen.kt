@@ -127,7 +127,24 @@ fun RegisterScreen(modifier: Modifier = Modifier, navController: NavController, 
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(onClick = {
-            authViewModel.register(email,password,username)
+            if (email.isNotBlank() && password.isNotBlank() && username.isNotBlank()) {
+                authViewModel.requestOtp(
+                    email = email,
+                    onSuccess = {
+                        navController.currentBackStackEntry?.savedStateHandle?.apply {
+                            set("email", email)
+                            set("password", password)
+                            set("username", username)
+                        }
+                        navController.navigate("otpAuth")
+                    },
+                    onError = { error ->
+                        Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                    }
+                )
+            } else {
+                Toast.makeText(context, "Fill all fields", Toast.LENGTH_SHORT).show()
+            }
         },
             enabled = authState.value != AuthState.Loading,
             modifier = Modifier

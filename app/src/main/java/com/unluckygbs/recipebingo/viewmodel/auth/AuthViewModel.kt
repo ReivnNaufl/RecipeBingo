@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.unluckygbs.recipebingo.data.client.KeyClient
 import com.unluckygbs.recipebingo.data.dataclass.UserProfile
 import com.unluckygbs.recipebingo.data.entity.UserEntity
 import com.unluckygbs.recipebingo.data.repository.DailyEatsRepository
@@ -253,6 +254,41 @@ class AuthViewModel(
                     .addOnFailureListener { onError(it.message ?: "Unknown error") }
             } catch (e: Exception) {
                 onError(e.message ?: "Update failed")
+            }
+        }
+    }
+
+    fun requestOtp(email: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val body = mapOf("email" to email)
+                val response = KeyClient.apiService.postOtpRequest(body = body)
+
+                if (response.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onError("OTP request failed: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                onError(e.message ?: "Failed to request OTP")
+            }
+        }
+    }
+
+    fun verifyOtp(email: String, otp: Int, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val body = mapOf("email" to email, "otp" to otp.toString())
+                val response = KeyClient.apiService.postOtpVerification(body = body)
+
+                val responseText = response.body()?.string() ?: ""
+                if (response.isSuccessful && responseText.contains("verified", ignoreCase = true)) {
+                    onSuccess()
+                } else {
+                    onError("Invalid or expired OTP")
+                }
+            } catch (e: Exception) {
+                onError(e.message ?: "Failed to verify OTP")
             }
         }
     }
