@@ -1,5 +1,6 @@
 package com.unluckygbs.recipebingo.ui.screen.auth
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,6 +19,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +37,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.unluckygbs.recipebingo.data.client.KeyClient
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -136,25 +140,55 @@ fun OTPAuthScreen(navController: NavController, authViewModel: AuthViewModel, mo
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "Resend OTP?",
-            fontSize = 14.sp,
-            color = Color(0xFF4CAF50),
-            modifier = Modifier.clickable {
-                scope.launch {
-                    try {
-                        val body = mapOf("email" to email)
-                        val response = KeyClient.apiService.postOtpRequest(body = body)
-                        if (response.isSuccessful) {
-                            Toast.makeText(context, "OTP Resent", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, "Failed to resend OTP", Toast.LENGTH_SHORT).show()
-                        }
-                    } catch (e: Exception) {
-                        Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+        ResendOtpText(email = email, context = context, scope = scope)
+    }
+}
+
+@Composable
+fun ResendOtpText(email: String, context: Context, scope: CoroutineScope) {
+    var isTimerRunning by remember { mutableStateOf(true) }
+    var secondsLeft by remember { mutableStateOf(300) } // 5 minutes = 300 seconds
+
+    // Countdown timer
+    LaunchedEffect(isTimerRunning) {
+        if (isTimerRunning) {
+            while (secondsLeft > 0) {
+                delay(1000L)
+                secondsLeft--
+            }
+            isTimerRunning = false
+        }
+    }
+
+    val minutes = secondsLeft / 60
+    val seconds = secondsLeft % 60
+
+    val textColor = if (isTimerRunning) Color.Gray else Color(0xFF4CAF50)
+
+    Text(
+        text = if (isTimerRunning)
+            "Resend OTP in %02d:%02d".format(minutes, seconds)
+        else
+            "Resend OTP?",
+        fontSize = 14.sp,
+        color = textColor,
+        modifier = Modifier.clickable(enabled = !isTimerRunning) {
+            scope.launch {
+                try {
+                    val body = mapOf("email" to email)
+                    val response = KeyClient.apiService.postOtpRequest(body = body)
+                    if (response.isSuccessful) {
+                        Toast.makeText(context, "OTP Resent", Toast.LENGTH_SHORT).show()
+                        // Restart timer
+                        secondsLeft = 300
+                        isTimerRunning = true
+                    } else {
+                        Toast.makeText(context, "Failed to resend OTP", Toast.LENGTH_SHORT).show()
                     }
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
-        )
-    }
+        }
+    )
 }

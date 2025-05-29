@@ -90,6 +90,7 @@ fun NutritionTracker(
     val totalCalories = calorie?.amount?.toFloat() ?: 0
 
 
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -152,32 +153,105 @@ fun NutritionTracker(
         // Nutrients Summary
         Text("Nutrients", fontWeight = FontWeight.Bold)
 
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-            CircularProgressIndicator(
-                progress = (totalCalories.toFloat() / 2400f).coerceIn(0f, 1f),
-                modifier = Modifier.size(120.dp),
-                color = Color.Green,
-                strokeWidth = 8.dp
+            Card(
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             )
-            Text("${totalCalories} Kcal", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
-        }
+            {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp)
+                ) {
+                    CircularProgressIndicator(
+                        progress = (totalCalories.toFloat() / 2400f).coerceIn(0f, 1f),
+                        modifier = Modifier.size(120.dp),
+                        color = Color(0xFF00C853), // Hijau terang
+                        strokeWidth = 8.dp
+                    )
+                    Text(
+                        text = "${totalCalories} Kcal",
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                }
+            }
 
-        Spacer(modifier = Modifier.height(12.dp))
+
+            Spacer(modifier = Modifier.height(12.dp))
 
         Column {
             val nutrients = totalNutrition
             if (nutrients == null) {
                 Text("No recipe eaten today")
             } else {
-                nutrients.forEach { nutrient ->
-                    if (nutrient.name != "Calories") {
-                        Text(String.format("%.2f %s of %s", nutrient.amount, nutrient.unit, nutrient.name))
-                    }
-                }
+                    val filteredItems = nutrients
+                        .filter { it.name != "Calories" }
+                        .map { "${it.name}: ${it.amount} ${it.unit}" }
+                    NutritionTableSection(
+                        title = "Nutrition",
+                        items = filteredItems
+                    )
+
             }
         }
     }
 }}}
+
+@Composable
+fun NutritionTableSection(title: String, items: List<String>) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        androidx.compose.material.Text(
+            text = title,
+            style = androidx.compose.material.MaterialTheme.typography.subtitle1
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            androidx.compose.material.Text(
+                "Name",
+                modifier = Modifier.weight(3f),
+                style = androidx.compose.material.MaterialTheme.typography.body2
+            )
+            androidx.compose.material.Text(
+                "Amount",
+                modifier = Modifier.weight(2f),
+                style = androidx.compose.material.MaterialTheme.typography.body2
+            )
+        }
+
+        androidx.compose.material.Divider()
+
+        items.forEachIndexed { index, item ->
+            val parts = item.split(":").map { it.trim() }
+            val name = parts.getOrNull(0) ?: "-"
+            val amount = parts.getOrNull(1) ?: "-"
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                androidx.compose.material.Text(name, modifier = Modifier.weight(3f))
+                androidx.compose.material.Text(amount, modifier = Modifier.weight(2f))
+            }
+            androidx.compose.material.Divider()
+        }
+    }
+}
 
 @Composable
 fun RectangleRecipeItem(rank: String, imageUrl: String, onClick: () -> Unit) {

@@ -12,15 +12,14 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,9 +32,8 @@ import coil.compose.AsyncImage
 import com.unluckygbs.recipebingo.data.entity.RecipeEntity
 import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
 import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModel
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import com.unluckygbs.recipebingo.R
 import com.unluckygbs.recipebingo.viewmodel.ingredient.IngredientViewModel
 
@@ -53,7 +51,7 @@ fun RecipeDetailScreen(
     val isBookmarked by recipeViewModel.isBookmarked.collectAsState()
 
     LaunchedEffect(recipeId) {
-        if (recipeViewModel.isRecipeExist(recipeId)){
+        if (recipeViewModel.isRecipeExist(recipeId)) {
             recipeViewModel.getRecipeByIdLocal(recipeId)
             recipeViewModel.observeBookmarkStatus(recipeId)
         } else {
@@ -85,18 +83,19 @@ fun RecipeDetailScreenContent(
     context: Context,
     ingredientViewModel: IngredientViewModel
 ) {
-
     val translatedIngredients by recipeViewModel.translatedIngredients.observeAsState()
     val translatedSteps by recipeViewModel.translatedSteps.observeAsState()
     val translatedNutrition by recipeViewModel.translatedNutrition.observeAsState()
-
     val isTranslating by recipeViewModel.isTranslating.collectAsState()
     var isTranslated by remember { mutableStateOf(false) }
+
+    // Tab state
+    var selectedTabIndex by remember { mutableStateOf(0) }
+    val tabs = listOf("Ingredients & Nutrition", "Steps")
 
     Log.d("NUTRITION", "Nutrition: ${recipeById?.nutrition}")
 
     if (recipeById == null) {
-        // Tampilkan indikator loading atau teks error
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
@@ -108,7 +107,7 @@ fun RecipeDetailScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
-                .padding(bottom = 80.dp) // Menambahkan padding untuk memberi ruang bagi FAB
+                .padding(bottom = 80.dp) // Space for FAB
         ) {
             // Header with back button and recipe image
             item {
@@ -123,7 +122,7 @@ fun RecipeDetailScreenContent(
                         modifier = Modifier.align(Alignment.TopStart)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            painter = painterResource(R.drawable.material_symbols_arrow_back),
                             contentDescription = "Back"
                         )
                     }
@@ -139,7 +138,6 @@ fun RecipeDetailScreenContent(
                                 .align(Alignment.Center)
                         )
                     } else {
-                        // Placeholder jika gambar tidak tersedia
                         Box(
                             modifier = Modifier
                                 .size(100.dp)
@@ -154,15 +152,21 @@ fun RecipeDetailScreenContent(
             item {
                 Text(
                     text = recipeById.title,
-                    style = TextStyle(textIndent = TextIndent(firstLine = 17.sp)),
+                    style = TextStyle(
+                        textIndent = TextIndent(firstLine = 17.sp),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 12.dp)
                 )
             }
 
+
             item { Divider() }
 
+            // Translate Button
             item {
                 Row(
                     modifier = Modifier
@@ -189,60 +193,105 @@ fun RecipeDetailScreenContent(
 
             item { Divider() }
 
-            if (isTranslating) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(32.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
+            // TabRow
+            item {
+                TabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    backgroundColor = Color.White,
+                    contentColor = Color(0xFF00C853)
+                ) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            text = { Text(title) },
+                            selected = selectedTabIndex == index,
+                            onClick = {
+                                selectedTabIndex = index
+                            }
+                        )
                     }
                 }
-            } else {
-                // Ingredients section
-                item {
-                    SectionWithDots(
-                        title = "Ingredients",
-                        items = if (isTranslated)
-                            translatedIngredients ?: emptyList()
-                        else
-                            recipeById.extendedIngredient.map { it.original }
-                    )
-                }
+            }
 
-                item { Divider() }
-
-                // Steps section
-                val steps = recipeById.analyzedInstruction.flatMap { it.steps }.map { it.step }
-                item {
-                    SectionWithDots(
-                        title = "Steps",
-                        items = if (isTranslated)
-                            translatedSteps ?: emptyList()
-                        else
-                            steps
-                    )
-                }
-
-                item { Divider() }
-
-                // Nutrition section
-                val nutrients = recipeById.nutrition.map { "${it.name}: ${it.amount} ${it.unit}" }
-                item {
-                    SectionWithDots(
-                        title = "Nutrition",
-                        items = if (isTranslated)
-                            translatedNutrition ?: emptyList()
-                        else
-                            nutrients
-                    )
+            // Content with Box and LazyColumn
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(400.dp) // Adjust height as needed
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        when (selectedTabIndex) {
+                            0 -> {
+                                // Ingredients and Nutrition Page
+                                if (isTranslating) {
+                                    item {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(32.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            CircularProgressIndicator()
+                                        }
+                                    }
+                                } else {
+                                    // Ingredients section
+                                    item {
+                                        SectionWithDots(
+                                            title = "Ingredients",
+                                            items = if (isTranslated)
+                                                translatedIngredients ?: emptyList()
+                                            else
+                                                recipeById.extendedIngredient.map { it.original }
+                                        )
+                                    }
+                                    item { Divider() }
+                                    // Nutrition section
+                                    item {
+                                        NutritionTableSection(
+                                            title = "Nutrition",
+                                            items = if (isTranslated)
+                                                translatedNutrition ?: emptyList()
+                                            else
+                                                recipeById.nutrition.map { "${it.name}: ${it.amount} ${it.unit}" }
+                                        )
+                                    }
+                                }
+                            }
+                            1 -> {
+                                // Steps Page
+                                if (isTranslating) {
+                                    item {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(32.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            CircularProgressIndicator()
+                                        }
+                                    }
+                                } else {
+                                    item {
+                                        SectionWithNumbers(
+                                            title = "Steps",
+                                            items = if (isTranslated)
+                                                translatedSteps ?: emptyList()
+                                            else
+                                                recipeById.analyzedInstruction.flatMap { it.steps }.map { it.step }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        // Bottom buttons tetap di bawah layar
+        // Bottom buttons
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -307,8 +356,6 @@ fun RecipeDetailScreenContent(
                     Text("Eat")
                 }
             }
-
-
         }
     }
 }
@@ -324,18 +371,16 @@ fun BookmarkButton(
         onClick = {
             Log.d("BookmarkButton", "Clicked, toggling bookmark")
             onSaveClick()
-
         },
         backgroundColor = Color(0xFF00C853),
         modifier = modifier
     ) {
         Icon(
-            imageVector = if (isBookmarked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+            painter = if (isBookmarked) painterResource(R.drawable.tdesign_bookmark_filled) else painterResource(R.drawable.material_symbols_bookmark_outline),
             contentDescription = if (isBookmarked) "Remove Bookmark" else "Add Bookmark"
         )
     }
 }
-
 
 @Composable
 fun SectionWithDots(title: String, items: List<String>) {
@@ -353,6 +398,64 @@ fun SectionWithDots(title: String, items: List<String>) {
                 Text(text = item)
             }
             Spacer(modifier = Modifier.height(4.dp))
+        }
+    }
+}
+
+@Composable
+fun SectionWithNumbers(title: String, items: List<String>) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text(text = title, style = MaterialTheme.typography.subtitle1)
+        Spacer(modifier = Modifier.height(8.dp))
+        items.forEachIndexed { index, item ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "${index + 1}.",
+                    style = MaterialTheme.typography.body1,
+                    modifier = Modifier.width(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = item)
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+fun NutritionTableSection(title: String, items: List<String>) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text(text = title, style = MaterialTheme.typography.subtitle1)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text("Name", modifier = Modifier.weight(3f), style = MaterialTheme.typography.body2)
+            Text("Amount", modifier = Modifier.weight(2f), style = MaterialTheme.typography.body2)
+        }
+
+        Divider()
+
+        items.forEachIndexed { index, item ->
+            val parts = item.split(":").map { it.trim() }
+            val name = parts.getOrNull(0) ?: "-"
+            val amount = parts.getOrNull(1) ?: "-"
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(name, modifier = Modifier.weight(3f))
+                Text(amount, modifier = Modifier.weight(2f))
+            }
+            Divider()
         }
     }
 }

@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -150,6 +152,10 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, aut
             authViewModel.login(email, password)
         },
             enabled = authState.value != AuthState.Loading,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF4CAF50), // warna latar (hijau)
+                contentColor = Color.White           // warna teks
+            ),
             modifier = Modifier
                 .width(280.dp)
                 .height(40.dp)
@@ -178,6 +184,10 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, aut
             googleSignInLauncher.launch(googleSignInClient.signInIntent)
         },
             enabled = authState.value != AuthState.Loading,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF4CAF50), // warna latar (hijau)
+                contentColor = Color.White           // warna teks
+            ),
             modifier = Modifier
                 .width(280.dp)
                 .height(40.dp)

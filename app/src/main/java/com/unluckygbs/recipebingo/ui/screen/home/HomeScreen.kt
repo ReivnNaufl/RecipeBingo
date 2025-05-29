@@ -48,6 +48,8 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.getValue
@@ -217,6 +219,14 @@ fun HomeDetail(
 
                 item {
                     SectionTitle(title = "Today's Nutrition")
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ){
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -224,6 +234,7 @@ fun HomeDetail(
                         contentAlignment = Alignment.Center
                     ) {
                         CircularNutritionProgress(kcal = totalCalories.toFloat())
+                    }
                     }
                 }
             }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -147,6 +149,10 @@ fun RegisterScreen(modifier: Modifier = Modifier, navController: NavController, 
             }
         },
             enabled = authState.value != AuthState.Loading,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF4CAF50), // warna latar (hijau)
+                contentColor = Color.White           // warna teks
+            ),
             modifier = Modifier
                 .width(280.dp)
                 .height(40.dp)

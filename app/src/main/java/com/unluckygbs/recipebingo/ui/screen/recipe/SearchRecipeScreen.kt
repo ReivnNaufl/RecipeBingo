@@ -28,8 +28,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -42,6 +42,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -51,7 +52,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +64,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -78,8 +79,12 @@ import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, recipeViewModel: RecipeViewModel) {
-
+fun SearchRecipeScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    authViewModel: AuthViewModel,
+    recipeViewModel: RecipeViewModel
+) {
     val authState = authViewModel.authState.observeAsState()
     val recipe by recipeViewModel.recipe.observeAsState(emptyList())
     val isLoading by recipeViewModel.loading.observeAsState(false)
@@ -91,12 +96,12 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val scope = rememberCoroutineScope()
     val openBottomSheet = remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     val _selectedFilters = remember { mutableStateOf<Set<String>>(setOf("without")) }
     val selectedFilters = _selectedFilters.value
+    val _filterValues = remember { mutableStateOf<Map<String, String>>(emptyMap()) } // Track filter values
 
     val filterPairs = mapOf(
         "Min Calorie" to "Max Calorie",
@@ -108,18 +113,38 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
         "Min Fat" to "Max Fat",
         "Max Fat" to "Min Fat"
     )
+    val allFilters = listOf(
+        "with",
+        "without",
+        "Min Calorie",
+        "Max Calorie",
+        "Min Protein",
+        "Max Protein",
+        "Min Sugar",
+        "Max Sugar",
+        "Min Fat",
+        "Max Fat"
+    )
 
     fun onFilterClick(filter: String) {
         val current = _selectedFilters.value.toMutableSet()
         if (filter == "with" || filter == "without") {
             current.remove("with")
             current.remove("without")
+            if (filter == "with") {
+                // Clear all nutrient filters and their values when "with" is selected
+                current.removeAll(allFilters.filter { it != "with" && it != "without" })
+                _filterValues.value = emptyMap()
+            }
             current.add(filter)
         } else {
+            if ("with" in current) return
             if (current.contains(filter)) {
                 current.remove(filter)
+                _filterValues.value = _filterValues.value.toMutableMap().apply {
+                    remove(filter)
+                }
             } else {
-                filterPairs[filter]?.let { pair -> current.remove(pair) }
                 current.add(filter)
             }
         }
@@ -127,7 +152,7 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
     }
 
     LaunchedEffect(authState.value) {
-        when(authState.value){
+        when (authState.value) {
             is AuthState.unAuthenticated -> navController.navigate("login")
             else -> Unit
         }
@@ -144,13 +169,15 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                 title = { Text("Search Recipe") },
                 actions = {
                     IconButton(onClick = { navController.navigate("bookmarkedrecipe") }) {
-                        Icon(painter = painterResource(R.drawable.material_symbols_bookmark_outline), contentDescription = "Bookmark")
+                        Icon(
+                            painter = painterResource(R.drawable.material_symbols_bookmark_outline),
+                            contentDescription = "Bookmark"
+                        )
                     }
                 }
             )
         }
     ) { padding ->
-
         Column(
             modifier = modifier
                 .padding(padding)
@@ -165,18 +192,21 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                     searchQuery = it
                 },
                 placeholder = {
-                    Text("Search...",
+                    Text(
+                        "Search...",
                         modifier = Modifier
                             .padding(start = 16.dp)
                     )
                 },
                 trailingIcon = {
-                    IconButton(onClick = {
-                        if (searchQuery.isNotBlank()) {
-                            recipeViewModel.fetchRecipe(searchQuery)
-                        }
-                    }, modifier = Modifier
-                        .padding(end = 16.dp)
+                    IconButton(
+                        onClick = {
+                            if (searchQuery.isNotBlank()) {
+                                recipeViewModel.fetchRecipe(searchQuery)
+                            }
+                        },
+                        modifier = Modifier
+                            .padding(end = 16.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Search,
@@ -235,8 +265,7 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(recommended) { recipe ->
-                            RecipeResultItem(recipe)
-                            {
+                            RecipeResultItem(recipe) {
                                 navController.navigate("detailedrecipe/${recipe.id}")
                             }
                         }
@@ -270,8 +299,7 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(items = recipe) { recipe ->
-                            RecipeResultItem(recipe)
-                            {
+                            RecipeResultItem(recipe) {
                                 navController.navigate("detailedrecipe/${recipe.id}")
                             }
                         }
@@ -287,47 +315,51 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
                 }
             }
         }
-        if (openBottomSheet.value){
+        if (openBottomSheet.value) {
             ModalBottomSheet(
                 onDismissRequest = { openBottomSheet.value = false },
                 sheetState = sheetState
-            ){
+            ) {
                 RecipeRecommendationBottomSheets(
                     selectedFilters = selectedFilters,
+                    filterValues = _filterValues.value,
                     onFilterClick = ::onFilterClick,
-                    onRecommendClick = {
+                    onRecommendClick = { filterValues ->
                         openBottomSheet.value = false
 
-                        // Inisialisasi map filter
+                        // Initialize map for nutrient parameters
                         val nutrientParams = mutableMapOf<String, Int>()
 
-                        if ("Min Calorie" in selectedFilters) nutrientParams["minCalories"] = 10
-                        if ("Max Calorie" in selectedFilters) nutrientParams["maxCalories"] = 100
-                        if ("Min Protein" in selectedFilters) nutrientParams["minProtein"] = 10
-                        if ("Max Protein" in selectedFilters) nutrientParams["maxProtein"] = 100
-                        if ("Min Sugar" in selectedFilters) nutrientParams["minSugar"] = 10
-                        if ("Max Sugar" in selectedFilters) nutrientParams["maxSugar"] = 100
-                        if ("Min Fat" in selectedFilters) nutrientParams["minFat"] = 10
-                        if ("Max Fat" in selectedFilters) nutrientParams["maxFat"] = 100
-
-                        val isInvalid = "with" in selectedFilters && nutrientParams.isNotEmpty()
-
-                        if (isInvalid) {
-                            Toast.makeText(
-                                context,
-                                "You cannot combine ingredient-based and nutrient-based filters.",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        } else {
-                            if ("with" in selectedFilters) {
+                        if ("with" in selectedFilters) {
+                            // Jika "with" dipilih, abaikan filterValues
+                            if (selectedFilters.any { it != "with" && it != "without" }) {
+                                Toast.makeText(
+                                    context,
+                                    "You cannot combine ingredient-based and nutrient-based filters.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } else {
                                 recipeViewModel.fetchRecipeByAvailableIngredients()
-                            } else if (nutrientParams.isNotEmpty()) {
+                            }
+                        } else {
+                            // Map filter names to API parameters using user-entered values
+                            filterValues.forEach { (filter, value) ->
+                                when (filter) {
+                                    "Min Calorie" -> nutrientParams["minCalories"] = value.toIntOrNull() ?: 10
+                                    "Max Calorie" -> nutrientParams["maxCalories"] = value.toIntOrNull() ?: 100
+                                    "Min Protein" -> nutrientParams["minProtein"] = value.toIntOrNull() ?: 10
+                                    "Max Protein" -> nutrientParams["maxProtein"] = value.toIntOrNull() ?: 100
+                                    "Min Sugar" -> nutrientParams["minSugar"] = value.toIntOrNull() ?: 10
+                                    "Max Sugar" -> nutrientParams["maxSugar"] = value.toIntOrNull() ?: 100
+                                    "Min Fat" -> nutrientParams["minFat"] = value.toIntOrNull() ?: 10
+                                    "Max Fat" -> nutrientParams["maxFat"] = value.toIntOrNull() ?: 100
+                                }
+                            }
+                            if (nutrientParams.isNotEmpty()) {
                                 recipeViewModel.fetchRecipeByNutrition(nutrientParams)
                             } else {
                                 recipeViewModel.fetchRandomRecipes()
                             }
-
-                            openBottomSheet.value = false
                         }
                     },
                     context = context
@@ -337,11 +369,10 @@ fun SearchRecipeScreen(modifier: Modifier = Modifier, navController: NavControll
     }
 }
 
-
 @Composable
 fun RecipeResultItem(
     recipe: Recipe,
-    onClick: () -> Unit // tambahkan parameter onClick
+    onClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -373,7 +404,6 @@ fun RecipeResultItem(
     }
 }
 
-
 @Composable
 fun RecommendationButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(
@@ -386,14 +416,28 @@ fun RecommendationButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeRecommendationBottomSheets(
     selectedFilters: Set<String>,
+    filterValues: Map<String, String>,
     onFilterClick: (String) -> Unit,
-    onRecommendClick: () -> Unit,
+    onRecommendClick: (Map<String, String>) -> Unit,
     context: Context
 ) {
+    // State to hold input values for each filter
+    val localFilterValues = remember { mutableStateOf(filterValues) }
+    // State to control dialog visibility and current filter being edited
+    var showDialog by remember { mutableStateOf(false) }
+    var currentFilter by remember { mutableStateOf<String?>(null) }
+    var dialogInput by remember { mutableStateOf("") }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // Update localFilterValues when filterValues changes
+    LaunchedEffect(filterValues) {
+        localFilterValues.value = filterValues
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -430,6 +474,7 @@ fun RecipeRecommendationBottomSheets(
                 FilterChip(
                     text = "Based on available Ingredients",
                     selected = isWithSelected,
+                    value = null,
                     onClick = {
                         onFilterClick(if (isWithSelected) "without" else "with")
                     }
@@ -449,7 +494,19 @@ fun RecipeRecommendationBottomSheets(
                 FilterChip(
                     text = filter,
                     selected = selectedFilters.contains(filter),
-                    onClick = { onFilterClick(filter) }
+                    value = localFilterValues.value[filter],
+                    onClick = {
+                        if (!selectedFilters.contains("with")) {
+                            if (selectedFilters.contains(filter)) {
+                                onFilterClick(filter) // Deselect if already selected
+                            } else {
+                                currentFilter = filter
+                                dialogInput = localFilterValues.value[filter] ?: ""
+                                showDialog = true
+                            }
+                        }
+                    },
+                    enabled = !selectedFilters.contains("with")
                 )
             }
         }
@@ -466,16 +523,126 @@ fun RecipeRecommendationBottomSheets(
                 FilterChip(
                     text = filter,
                     selected = selectedFilters.contains(filter),
-                    onClick = { onFilterClick(filter) }
+                    value = localFilterValues.value[filter],
+                    onClick = {
+                        if (!selectedFilters.contains("with")) {
+                            if (selectedFilters.contains(filter)) {
+                                onFilterClick(filter) // Deselect if already selected
+                            } else {
+                                currentFilter = filter
+                                dialogInput = localFilterValues.value[filter] ?: ""
+                                showDialog = true
+                            }
+                        }
+                    },
+                    enabled = !selectedFilters.contains("with")
                 )
             }
+        }
+
+        // Dialog for entering filter value
+        if (showDialog && currentFilter != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDialog = false
+                    dialogInput = ""
+                    currentFilter = null
+                },
+                title = { Text("Enter $currentFilter") },
+                text = {
+                    OutlinedTextField(
+                        value = dialogInput,
+                        onValueChange = { value ->
+                            if (value.all { it.isDigit() } || value.isEmpty()) {
+                                dialogInput = value
+                            }
+                        },
+                        label = { Text("Value") },
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = { keyboardController?.hide() }
+                        ),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            containerColor = Color(0xFFF1F1F1),
+                            focusedBorderColor = Color(0xFF00C853),
+                            unfocusedBorderColor = Color.Gray
+                        )
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            if (dialogInput.isNotBlank()) {
+                                localFilterValues.value = localFilterValues.value.toMutableMap().apply {
+                                    put(currentFilter!!, dialogInput)
+                                }
+                                onFilterClick(currentFilter!!) // Select the filter
+                                showDialog = false
+                                dialogInput = ""
+                                currentFilter = null
+                                keyboardController?.hide()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Please enter a value.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    ) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showDialog = false
+                            dialogInput = ""
+                            currentFilter = null
+                            keyboardController?.hide()
+                        }
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
         // Button: Recommend me a recipe
         Button(
-            onClick = onRecommendClick,
+            onClick = {
+                // Validate inputs
+                if (selectedFilters.contains("with")) {
+                    // Jika "with" dipilih, abaikan semua filter min/max
+                    if (selectedFilters.any { it != "with" && it != "without" }) {
+                        Toast.makeText(
+                            context,
+                            "Cannot combine 'Based on available Ingredients' with nutrient filters.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } else {
+                        onRecommendClick(emptyMap()) // Kirim map kosong untuk mengabaikan filter min/max
+                    }
+                } else {
+                    // Validasi untuk filter min/max
+                    val invalidInputs = selectedFilters.filter { it != "with" && it != "without" }
+                        .any { localFilterValues.value[it].isNullOrBlank() }
+                    if (invalidInputs) {
+                        Toast.makeText(
+                            context,
+                            "Please enter values for all selected filters.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } else {
+                        onRecommendClick(localFilterValues.value)
+                    }
+                }
+            },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C853)),
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier
@@ -486,14 +653,18 @@ fun RecipeRecommendationBottomSheets(
         }
     }
 }
-
-
 @Composable
-fun FilterChip(text: String, selected: Boolean, onClick: () -> Unit) {
+fun FilterChip(
+    text: String,
+    selected: Boolean,
+    value: String?,
+    onClick: () -> Unit,
+    enabled: Boolean = true
+) {
     OutlinedButton(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
-        colors = if (selected) {
+        colors = if (selected && enabled) {
             ButtonDefaults.outlinedButtonColors(
                 containerColor = Color(0xFF00C853),
                 contentColor = Color.White
@@ -501,12 +672,16 @@ fun FilterChip(text: String, selected: Boolean, onClick: () -> Unit) {
         } else {
             ButtonDefaults.outlinedButtonColors(
                 containerColor = Color.Transparent,
-                contentColor = Color.Black
+                contentColor = if (enabled) Color.Black else Color.Gray
             )
         },
         border = ButtonDefaults.outlinedButtonBorder,
-        modifier = Modifier.height(36.dp)
+        modifier = Modifier.height(36.dp),
+        enabled = enabled
     ) {
-        Text(text = text, fontSize = 12.sp)
+        Text(
+            text = if (value != null && value.isNotBlank()) "$text: $value" else text,
+            fontSize = 12.sp
+        )
     }
 }
