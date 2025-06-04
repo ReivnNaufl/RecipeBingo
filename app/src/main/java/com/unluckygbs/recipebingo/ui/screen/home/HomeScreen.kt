@@ -144,7 +144,7 @@ fun HomeDetail(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Available Ingredients") },
+                title = { Text("Home") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
