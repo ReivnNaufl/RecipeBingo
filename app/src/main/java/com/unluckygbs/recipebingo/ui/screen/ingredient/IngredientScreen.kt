@@ -39,11 +39,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import com.unluckygbs.recipebingo.data.dataclass.Ingredient
 import com.unluckygbs.recipebingo.data.entity.IngredientEntity
 import kotlinx.coroutines.launch
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.ImeAction
+import com.unluckygbs.recipebingo.R
 
 
 @Composable
@@ -160,7 +162,7 @@ fun AvailableIngredientsScreen(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         IconButton(onClick = { if (quantity > 0) quantity-- }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Decrease", tint = Color(0xFF4CAF50))
+                            Icon(painter = painterResource(R.drawable.ic_baseline_minus), contentDescription = "Decrease", tint = Color(0xFF4CAF50))
                         }
                         OutlinedTextField(
                             value = quantity.toString(),
