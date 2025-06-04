@@ -247,7 +247,7 @@ fun App(
                     )
 
                     val scale by animateFloatAsState(
-                        targetValue = if (isSelected) 1.2f else 1f,
+                        targetValue = if (isSelected) 1.1f else 1f,
                         animationSpec = tween(durationMillis = 300)
                     )
 
@@ -262,22 +262,21 @@ fun App(
                                 modifier = Modifier
                                     .graphicsLayer { scaleX = scale; scaleY = scale }
                                     .background(backgroundColor, shape = CircleShape)
-                                    .padding(horizontal = if (isSelected) 16.dp else 0.dp, vertical = 6.dp) // Tambah padding
+                                    .padding(horizontal = if (isSelected) 12.dp else 0.dp, vertical = 6.dp)
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Start // Ubah ke Start
+                                    horizontalArrangement = Arrangement.Center
                                 ) {
                                     NavIconView(navItem.icon, navItem.label, if (isSelected) 24.dp else 18.dp, if (isSelected) Color.White else Color.Gray)
                                     AnimatedVisibility(visible = isSelected) {
-                                        Row { // Tambahan Row untuk kontrol jarak
-                                            Spacer(modifier = Modifier.width(4.dp)) // Jarak lebih besar untuk pengujian
-                                            Text(
-                                                text = navItem.label,
-                                                color = Color.White,
-                                                fontSize = 12.sp
-                                            )
-                                        }
+                                        Row{
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = navItem.label,
+                                            color = Color.White,
+                                            fontSize = 12.sp
+                                        )}
                                     }
                                 }
                             }
@@ -290,7 +289,7 @@ fun App(
                         ),
                         modifier = Modifier
                             .weight(if (isSelected) 1.5f else 1f)
-                            .widthIn(min = if (isSelected) 120.dp else 40.dp) // Tambah lebar
+                            .widthIn(min = if (isSelected) 100.dp else 40.dp)
                     )
                 }
             }
