@@ -22,6 +22,7 @@ import com.unluckygbs.recipebingo.data.repository.UserRepository
 import com.unluckygbs.recipebingo.repository.IngredientRepository
 import com.unluckygbs.recipebingo.ui.theme.RecipeBingoTheme
 import com.unluckygbs.recipebingo.util.DataStoreManager
+import com.unluckygbs.recipebingo.util.TranslatorHelper
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModel
 import com.unluckygbs.recipebingo.viewmodel.auth.AuthViewModelFactory
 import kotlinx.coroutines.launch
@@ -42,6 +43,12 @@ class MainActivity : ComponentActivity() {
         authViewModel.syncUserProfileIfOnline(this)
         val ingredientRepository = IngredientRepository(AppDatabase.getDatabase(this).ingredientDao(), firestore = firestore, userId = authViewModel.getCurrentUserUid() ?: "")
         val dataStoreManager = DataStoreManager(applicationContext)
+
+        val translator: TranslatorHelper = TranslatorHelper()
+
+        lifecycleScope.launch {
+            translator.downloadModel()
+        }
 
         setContent {
             val isFirstLaunch by produceState<Boolean?>(initialValue = null) {
@@ -68,7 +75,8 @@ class MainActivity : ComponentActivity() {
                                 lifecycleScope.launch {
                                     dataStoreManager.setFirstLaunchDone()
                                 }
-                            }
+                            },
+                            translator
                         )
                     }
                 }

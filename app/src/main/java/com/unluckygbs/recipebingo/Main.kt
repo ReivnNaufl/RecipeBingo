@@ -92,11 +92,12 @@ import com.unluckygbs.recipebingo.viewmodel.recipe.RecipeViewModelFactory
 import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModel
 import com.unluckygbs.recipebingo.viewmodel.tracker.NutritionTrackerViewModelFactory
 import com.unluckygbs.recipebingo.R
+import com.unluckygbs.recipebingo.util.TranslatorHelper
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
-fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Context, startDestination: String, onOnboardingFinished: () -> Unit) {
+fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Context, startDestination: String, onOnboardingFinished: () -> Unit, translator: TranslatorHelper) {
     val firestore = FirebaseFirestore.getInstance()
     val ingredientRepository = IngredientRepository(
         AppDatabase.getDatabase(context).ingredientDao(),
@@ -119,8 +120,9 @@ fun Main(modifier: Modifier = Modifier, authViewModel: AuthViewModel,context: Co
     val ingredientViewModel: IngredientViewModel = viewModel(
         factory = IngredientViewModelFactory(ingredientRepository)
     )
+
     val recipeViewModel: RecipeViewModel = viewModel(
-        factory = RecipeViewModelFactory(recipeRepository, ingredientRepository)
+        factory = RecipeViewModelFactory(recipeRepository, ingredientRepository, translator)
     )
 
     val nutritionTrackerViewModel: NutritionTrackerViewModel = viewModel(
@@ -245,7 +247,7 @@ fun App(
                     )
 
                     val scale by animateFloatAsState(
-                        targetValue = if (isSelected) 1.2f else 1f,
+                        targetValue = if (isSelected) 1.1f else 1f,
                         animationSpec = tween(durationMillis = 300)
                     )
 
@@ -268,7 +270,7 @@ fun App(
                                 ) {
                                     NavIconView(navItem.icon, navItem.label, if (isSelected) 24.dp else 18.dp, if (isSelected) Color.White else Color.Gray)
                                     AnimatedVisibility(visible = isSelected) {
-                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Spacer(modifier = Modifier.width(6.dp))
                                         Text(
                                             text = navItem.label,
                                             color = Color.White,

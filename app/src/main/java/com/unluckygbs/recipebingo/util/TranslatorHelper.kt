@@ -1,5 +1,6 @@
 package com.unluckygbs.recipebingo.util
 
+import android.util.Log
 import com.google.mlkit.nl.translate.*
 import kotlinx.coroutines.tasks.await
 
@@ -20,6 +21,15 @@ class TranslatorHelper {
         } catch (e: Exception) {
             e.printStackTrace()
             null
+        }
+    }
+
+    suspend fun downloadModel() {
+        try {
+            translator.downloadModelIfNeeded().await()
+            Log.d("TranslatorHelper", "Downloading model if needed")
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

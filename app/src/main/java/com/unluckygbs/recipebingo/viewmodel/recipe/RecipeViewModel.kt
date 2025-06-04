@@ -23,12 +23,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import androidx.compose.runtime.State
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class RecipeViewModel(
     private val recipeRepository: RecipeRepository,
-    private val ingredientRepository: IngredientRepository
+    private val ingredientRepository: IngredientRepository,
+    private val translator: TranslatorHelper
 ) : ViewModel() {
     private val _subtractionMessage = MutableStateFlow<String?>(null)
     val subtractionMessage: StateFlow<String?> = _subtractionMessage.asStateFlow()
@@ -263,7 +265,6 @@ class RecipeViewModel(
         viewModelScope.launch {
             _isTranslating.value = true
 
-            val translator = TranslatorHelper()
             val translatedIngredients = ingredients.map { translator.translateText(it) ?: it }
             val translatedSteps = steps.map { translator.translateText(it) ?: it }
             val translatedNutrition = nutrition.map { translator.translateText(it) ?: it }
@@ -273,6 +274,12 @@ class RecipeViewModel(
             _translatedNutrition.value = translatedNutrition
 
             _isTranslating.value = false
+        }
+    }
+
+    fun translatorModelDownload() {
+        viewModelScope.launch {
+            translator.downloadModel()
         }
     }
 
